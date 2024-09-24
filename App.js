@@ -1,20 +1,21 @@
-import { StatusBar } from 'expo-status-bar';
-import { StyleSheet, Text, View } from 'react-native';
+import React from "react";
+import { Text, View, ActivityIndicator, SafeAreaView } from "react-native";
+import { useFonts } from "expo-font";
+import LoginScreen from "./screens/LoginScreen";
 
 export default function App() {
+  // Load the font
+  const [fontsLoaded] = useFonts({
+    MyFont: require("./assets/fonts/MyFont.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return <ActivityIndicator size="large" color="#0000ff" />;
+  }
+
   return (
-    <View style={styles.container}>
-      <Text>Open up App.js to start working on your app!</Text>
-      <StatusBar style="auto" />
-    </View>
+    <>
+      <LoginScreen />
+    </>
   );
 }
-
-const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#fff',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-});
