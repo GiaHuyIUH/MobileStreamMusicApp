@@ -1,24 +1,37 @@
 import { useFonts } from "expo-font";
 import React from "react";
-import { TouchableOpacity } from "react-native";
+import { ImageBackground, TouchableOpacity } from "react-native";
 import { View, Text, Button, StyleSheet, Image } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 const LoginScreen = ({ navigation }) => {
-  const [fontsLoaded] = useFonts({
-    MyFont: require("../assets/fonts/MyFont.ttf"),
-  });
   return (
     <SafeAreaView style={styles.container}>
-      <View style={{ flex: 1, alignItems: "center" }}></View>
-      <View style={{ flex: 1, alignItems: "center" }}>
-        <Image
-          source={require("../assets/images/logo.png")}
-          style={{ width: 50, height: 50 }}
-        />
-        <Text style={styles.title}>Milions of songs.</Text>
-        <Text style={styles.title}>Free on Spotify.</Text>
-      </View>
+      <ImageBackground
+        source={require("../assets/images/cover.png")}
+        style={{
+          flex: 1.5,
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 20,
+          position: "relative",
+        }}
+      >
+        <View
+          style={{ alignItems: "center", position: "absolute", bottom: -100 }}
+        >
+          <Image
+            source={require("../assets/images/logo.png")}
+            style={{
+              width: 50,
+              height: 50,
+            }}
+          />
+          <Text style={styles.title}>Milions of songs.</Text>
+          <Text style={styles.title}>Free on Spotify.</Text>
+        </View>
+      </ImageBackground>
+      <View style={{ flex: 0.7, alignItems: "center" }}></View>
 
       <View style={styles.buttnGroup}>
         <TouchableOpacity
@@ -62,6 +75,20 @@ const LoginScreen = ({ navigation }) => {
           <Text style={styles.btnText}>Continue with Facebook</Text>
         </TouchableOpacity>
         <TouchableOpacity style={[styles.button, { backgroundColor: "#000" }]}>
+          <Image
+            source={require("../assets/images/logoApple.png")}
+            style={{
+              width: 20,
+              height: 20,
+              position: "absolute",
+              left: "6%",
+            }}
+          />
+          <Text style={styles.btnText}>Continue with Apple</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={[styles.button, { backgroundColor: "#000", borderWidth: 0 }]}
+        >
           <Text style={styles.btnText}>Log in</Text>
         </TouchableOpacity>
       </View>
