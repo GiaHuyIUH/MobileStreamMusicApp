@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import StartScreen from "../screens/StartScreen";
 import SignUpScreen1 from "../screens/SignUpScreen1";
 import SignUpScreen2 from "../screens/SignUpScreen2";
+import ChooseArtistScreen from "../screens/ChooseArtistScreen";
 
 const Stack = createStackNavigator();
 
@@ -37,6 +38,18 @@ const LoginStackNavigator = () => {
           name="SignUpScreen2"
           component={SignUpScreen2}
           options={setting}
+        />
+        <Stack.Screen
+          name="ChooseArtistScreen"
+          component={ChooseArtistScreen}
+          options={{
+            ...setting,
+            headerTitle: "Choose 3 or more artists you like.",
+            headerTitleStyle: {
+              fontWeight: "bold",
+              fontSize: 18,
+            },
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>

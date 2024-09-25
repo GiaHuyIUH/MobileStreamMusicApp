@@ -1,7 +1,6 @@
 import React from "react";
 import { Text, View, ActivityIndicator, SafeAreaView } from "react-native";
 import { useFonts } from "expo-font";
-import StartScreen from "./screens/StartScreen";
 import LoginStackNavigator from "./navigations/LoginStackNavigator";
 
 export default function App() {

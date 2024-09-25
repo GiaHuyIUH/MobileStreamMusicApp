@@ -106,7 +106,7 @@ const SignUpScreen2 = ({ navigation }) => {
               width: "100%",
               alignItems: "center",
             }}
-            onPress={() => navigation.navigate("Create an account")}
+            onPress={() => navigation.navigate("ChooseArtistScreen")}
           >
             <Text style={[styles.PrimaryLabel, { color: "#000" }]}>
               Create an account
