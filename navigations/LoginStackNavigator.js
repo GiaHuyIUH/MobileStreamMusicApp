@@ -5,6 +5,8 @@ import StartScreen from "../screens/StartScreen";
 import SignUpScreen1 from "../screens/SignUpScreen1";
 import SignUpScreen2 from "../screens/SignUpScreen2";
 import ChooseArtistScreen from "../screens/ChooseArtistScreen";
+import LogInScreen from "../screens/LogInScreen";
+import LogInNotPassScreen from "../screens/LogInNotPassScreen";
 
 const Stack = createStackNavigator();
 
@@ -50,6 +52,16 @@ const LoginStackNavigator = () => {
               fontSize: 18,
             },
           }}
+        />
+        <Stack.Screen
+          name="LogInScreen"
+          component={LogInScreen}
+          options={{ ...setting, headerTitle: "Log in" }}
+        />
+        <Stack.Screen
+          name="LogInNotPassScreen"
+          component={LogInNotPassScreen}
+          options={{ ...setting, headerTitle: "Log in without password" }}
         />
       </Stack.Navigator>
     </NavigationContainer>

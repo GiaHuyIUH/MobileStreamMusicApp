@@ -95,7 +95,7 @@ const SignUpScreen2 = ({ navigation }) => {
           </View>
         </View>
         <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
+          style={{ flex: 1, alignItems: "center", justifyContent: "flex-end" }}
         >
           <TouchableOpacity
             // disabled={email.length || password.length < 8 ? true : false}

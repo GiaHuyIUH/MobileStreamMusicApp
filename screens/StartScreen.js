@@ -84,6 +84,7 @@ const StartScreen = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity
           style={[styles.button, { backgroundColor: "#000", borderWidth: 0 }]}
+          onPress={() => navigation.navigate("LogInScreen")}
         >
           <Text style={styles.btnText}>Log in</Text>
         </TouchableOpacity>
