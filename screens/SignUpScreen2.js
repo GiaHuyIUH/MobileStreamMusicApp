@@ -1,214 +1,186 @@
-import React, { useState } from "react";
+import React from "react";
 import {
+  SafeAreaView,
   View,
-  Text,
+  ScrollView,
   TextInput,
+  Text,
   StyleSheet,
+  Image,
   TouchableOpacity,
 } from "react-native";
-import { Picker } from "@react-native-picker/picker";
-import Checkbox from "expo-checkbox"; // Importing Expo's Checkbox component
 
-const SignUpScreen2 = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [selectedGender, setSelectedGender] = useState("");
-  const [isCheckedNews, setIsCheckedNews] = useState(false);
-  const [isCheckedMarketing, setIsCheckedMarketing] = useState(false);
-
+const App = () => {
   return (
-    <View style={styles.container}>
-      <View style={{ flex: 1, backgroundColor: "#121212", padding: 20 }}>
-        {/* Email field */}
-        <Text style={styles.PrimaryLabel}>What's your name?</Text>
-        <View style={styles.inputContainer}>
+    <SafeAreaView style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollView}>
+        {/* Search Bar */}
+        <View style={styles.searchContainer}>
           <TextInput
-            style={styles.inputPass}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            placeholder="Artists, songs, or podcasts"
+            placeholderTextColor="#B3B3B3"
+            style={styles.searchInput}
           />
         </View>
-        <Text style={styles.label}>
-          You'll need to confirm this email later.
-        </Text>
 
-        {/* Password field */}
-        <Text style={styles.PrimaryLabel}>What's your gender?</Text>
-        <View style={styles.inputContainer}>
-          <Picker
-            selectedValue={selectedGender}
-            style={styles.picker}
-            onValueChange={(itemValue, itemIndex) =>
-              setSelectedGender(itemValue)
-            }
-          >
-            <Picker.Item label="Select Gender" value="" />
-            <Picker.Item label="Male" value="male" />
-            <Picker.Item label="Female" value="female" />
-            <Picker.Item label="Other" value="other" />
-          </Picker>
+        {/* Your Top Genres */}
+        <Text style={styles.sectionTitle}>Your top genres</Text>
+        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
+          {topGenres.map((genre, index) => (
+            <TouchableOpacity key={index} style={[styles.genreCard, { backgroundColor: genre.color }]}>
+              <Image source={{ uri: genre.image }} style={styles.genreImage} />
+              <Text style={styles.genreText}>{genre.name}</Text>
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+
+        {/* Popular Podcast Categories */}
+        <Text style={styles.sectionTitle}>Popular podcast categories</Text>
+        <View style={styles.categoryContainer}>
+          {podcastCategories.map((category, index) => (
+            <TouchableOpacity key={index} style={[styles.categoryCard, { backgroundColor: category.color }]}>
+              <Image source={{ uri: category.icon }} style={styles.categoryIcon} />
+              <Text style={styles.categoryText}>{category.name}</Text>
+              <Text style={styles.categorySubtitle}>Album</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-        {/* Divider */}
-        <View style={styles.divider} />
 
-        <View style={styles.containerTerm}>
-          {/* Terms of Use Text */}
-          <Text style={styles.termsText}>
-            By tapping on "Create account", you agree to the spotify Terms of
-            Use.
-          </Text>
-
-          <TouchableOpacity>
-            <Text style={styles.linkText}>Terms of Use</Text>
-          </TouchableOpacity>
-
-          <Text style={styles.privacyText}>
-            To learn more about how Spotify collects, uses, shares and protects
-            your personal data, Please see the Spotify Privacy Policy.
-          </Text>
-
-          <TouchableOpacity>
-            <Text style={styles.linkText}>Privacy Policy</Text>
-          </TouchableOpacity>
-
-          <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxLabel}>
-              Please send me news and offers from Spotify.
-            </Text>
-            <Checkbox
-              value={isCheckedNews}
-              onValueChange={setIsCheckedNews}
-              color={isCheckedNews ? "#1DB954" : undefined} // Custom color when checked
-            />
-          </View>
-
-          <View style={styles.checkboxContainer}>
-            <Text style={styles.checkboxLabel}>
-              Share my registration data with Spotify's content.
-            </Text>
-            <Checkbox
-              value={isCheckedMarketing}
-              onValueChange={setIsCheckedMarketing}
-              color={isCheckedMarketing ? "#1DB954" : undefined} // Custom color when checked
-            />
-          </View>
+        {/* Browse All */}
+        <Text style={styles.sectionTitle}>Browse all</Text>
+        <View style={styles.categoryContainer}>
+          {browseAll.map((item, index) => (
+            <TouchableOpacity key={index} style={[styles.categoryCard, { backgroundColor: item.color }]}>
+              <Image source={{ uri: item.icon }} style={styles.categoryIcon} />
+              <Text style={styles.categoryText}>{item.name}</Text>
+              <Text style={styles.categorySubtitle}>Album</Text>
+            </TouchableOpacity>
+          ))}
         </View>
-        <View
-          style={{ flex: 1, alignItems: "center", justifyContent: "flex-end" }}
-        >
-          <TouchableOpacity
-            // disabled={email.length || password.length < 8 ? true : false}
-            style={{
-              backgroundColor: "#ccc",
-              borderRadius: 30,
-              padding: 15,
-              width: "100%",
-              alignItems: "center",
-            }}
-            onPress={() => navigation.navigate("ChooseArtistScreen")}
-          >
-            <Text style={[styles.PrimaryLabel, { color: "#000" }]}>
-              Create an account
-            </Text>
-          </TouchableOpacity>
-        </View>
+      </ScrollView>
+
+      {/* Currently Playing Footer */}
+      <View style={styles.footer}>
+        <Text style={styles.footerText}>Easy</Text>
+        <Text style={styles.footerSubtitle}>Troye Sivan</Text>
+        <Text style={styles.footerInfo}>BEATSPILL+</Text>
       </View>
-    </View>
+    </SafeAreaView>
   );
 };
+
+const topGenres = [
+  { name: "Pop", color: "#5E27FD", image: "https://i.imgur.com/Z7yC4kE.png" },
+  { name: "Indie", color: "#2BB673", image: "https://i.imgur.com/TI6H7pe.png" },
+];
+
+const podcastCategories = [
+  { name: "News & Politics", color: "#007AFF", icon: "https://i.imgur.com/YoN7avT.png" },
+  { name: "Comedy", color: "#FF5C5C", icon: "https://i.imgur.com/1c5HTD7.png" },
+];
+
+const browseAll = [
+  { name: "2021 Wrapped", color: "#5E27FD", icon: "https://i.imgur.com/xHQaXeC.png" },
+  { name: "Podcasts", color: "#2BB673", icon: "https://i.imgur.com/1c5HTD7.png" },
+  { name: "Made for you", color: "#007AFF", icon: "https://i.imgur.com/1c5HTD7.png" },
+  { name: "Charts", color: "#FF5C5C", icon: "https://i.imgur.com/1c5HTD7.png" },
+];
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: "center",
+    backgroundColor: "#121212",
   },
-  inputContainer: {
-    flexDirection: "row",
+  scrollView: {
+    padding: 20,
+  },
+  searchContainer: {
+    marginBottom: 20,
+  },
+  searchInput: {
+    backgroundColor: "#282828",
+    borderRadius: 10,
+    padding: 10,
+    color: "#FFFFFF",
+  },
+  sectionTitle: {
+    color: "#FFFFFF",
+    fontSize: 18,
+    fontWeight: "bold",
+    marginBottom: 10,
+  },
+  genreCard: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+    marginRight: 10,
+    justifyContent: "flex-end",
     alignItems: "center",
+    padding: 10,
+    elevation: 5,
+  },
+  genreImage: {
+    width: 60,
+    height: 60,
+    position: "absolute",
+    top: 10,
+  },
+  genreText: {
+    color: "#FFFFFF",
+    fontWeight: "bold",
+  },
+  categoryContainer: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    justifyContent: "space-between",
+    marginBottom: 20,
+  },
+  categoryCard: {
+    width: "48%",
+    height: 100,
+    borderRadius: 10,
     justifyContent: "center",
-    borderColor: "#ccc",
-    backgroundColor: "#7777",
-    borderWidth: 1,
-    borderRadius: 5,
-    paddingHorizontal: 10,
-    marginBottom: 20,
-  },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    backgroundColor: "#7777",
-  },
-  inputPass: {
-    flex: 1,
-    height: 50,
-    color: "#fff",
-    fontSize: 22,
-  },
-  PrimaryLabel: {
-    fontSize: 22,
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  label: {
-    fontSize: 11,
-    marginBottom: 5,
-    color: "#fff",
-  },
-  picker: {
-    height: 50,
-    width: "100%",
-    color: "#fff",
-  },
-  termsText: {
-    color: "#fff",
+    alignItems: "center",
     marginBottom: 10,
-    fontSize: 11,
-    textAlign: "justify",
-    fontWeight: "bold",
+    padding: 10,
+    elevation: 5,
   },
-  privacyText: {
-    color: "#fff",
-    marginBottom: 10,
-    fontSize: 11,
-    textAlign: "justify",
+  categoryText: {
+    color: "#FFFFFF",
     fontWeight: "bold",
-  },
-  linkText: {
-    color: "#1DB954",
-    marginBottom: 20,
     fontSize: 16,
-    fontWeight: "bold",
+    marginTop: 5,
   },
-  checkboxContainer: {
+  categorySubtitle: {
+    color: "#B3B3B3",
+    fontSize: 12,
+  },
+  categoryIcon: {
+    width: 24,
+    height: 24,
+    position: "absolute",
+    top: 10,
+  },
+  footer: {
+    backgroundColor: "#282828",
+    padding: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
-    marginBottom: 20,
   },
-  checkboxLabel: {
-    color: "#fff",
-    fontSize: 12,
-    marginLeft: 10,
-    textAlign: "left",
+  footerText: {
+    color: "#FFFFFF",
+    fontSize: 16,
     fontWeight: "bold",
   },
-  containerTerm: {
-    flex: 1,
+  footerSubtitle: {
+    color: "#B3B3B3",
+    fontSize: 12,
   },
-  divider: {
-    height: 1,
-    backgroundColor: "#7777",
-    marginVertical: 20,
+  footerInfo: {
+    color: "#1DB954",
+    fontSize: 12,
   },
 });
 
-export default SignUpScreen2;
+export default App;
