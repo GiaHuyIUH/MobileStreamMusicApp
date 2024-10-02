@@ -7,6 +7,9 @@ import SearchScreen1 from "./screens/SearchScreen1";
 import SearchScreen2 from "./screens/SearchScreen2";
 import AlbumViewScreen from "./screens/AlbumViewScreen";
 import AlbumControlScreen from "./screens/AlbumControlScreen";
+import TrackViewScreen from "./screens/TrackViewScreen";
+import TrackScreen from "./screens/TrackScreen";
+import LibraryScreen from "./screens/LibraryScreen";
 
 export default function App() {
   // Load the font
@@ -20,9 +23,7 @@ export default function App() {
 
   return (
     <>
-      <AlbumControlScreen /> 
-      
-
+      <LibraryScreen />
       
     </>
   );
