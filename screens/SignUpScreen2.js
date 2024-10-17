@@ -8,12 +8,53 @@ import {
 } from "react-native";
 import { Picker } from "@react-native-picker/picker";
 import Checkbox from "expo-checkbox"; // Importing Expo's Checkbox component
+import {
+  createUserWithEmailAndPassword,
+  fetchSignInMethodsForEmail,
+} from "firebase/auth";
+import { auth, db } from "../components/firebase";
+import { setDoc, doc } from "firebase/firestore";
 
-const SignUpScreen2 = ({ navigation }) => {
-  const [email, setEmail] = useState("");
+const SignUpScreen2 = ({ route, navigation }) => {
+  const { email, password } = route.params;
+  const [userName, setUserName] = useState("");
   const [selectedGender, setSelectedGender] = useState("");
   const [isCheckedNews, setIsCheckedNews] = useState(false);
   const [isCheckedMarketing, setIsCheckedMarketing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const handleRegister = async () => {
+    try {
+      // Check if the email is already registered
+      const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+
+      if (signInMethods.length > 0) {
+        setErrorMessage("This email is already registered.");
+        return false;
+      } else setErrorMessage("You'll need to confirm this email later.");
+
+      // else Create a new user
+      await createUserWithEmailAndPassword(auth, email, password);
+      const user = auth.currentUser;
+      if (user) {
+        await setDoc(doc(db, "users", user.uid), {
+          email: user.email,
+          userName: userName,
+          gender: selectedGender,
+          avatar: "https://cdn-icons-png.flaticon.com/512/6997/6997494.png",
+        });
+      }
+      console.log("User: ", user);
+      return true;
+    } catch (error) {
+      console.log(error);
+      return false;
+    }
+  };
+
+  const handleClickCreateAccount = async () => {
+    if (handleRegister()) navigation.navigate("ChooseArtistScreen");
+  };
 
   return (
     <View style={styles.container}>
@@ -23,17 +64,12 @@ const SignUpScreen2 = ({ navigation }) => {
         <View style={styles.inputContainer}>
           <TextInput
             style={styles.inputPass}
-            value={email}
-            onChangeText={setEmail}
-            keyboardType="email-address"
-            autoCapitalize="none"
+            value={userName}
+            onChangeText={setUserName}
           />
+          <Text style={styles.label}>{errorMessage}</Text>
         </View>
-        <Text style={styles.label}>
-          You'll need to confirm this email later.
-        </Text>
 
-        {/* Password field */}
         <Text style={styles.PrimaryLabel}>What's your gender?</Text>
         <View style={styles.inputContainer}>
           <Picker
@@ -106,7 +142,7 @@ const SignUpScreen2 = ({ navigation }) => {
               width: "100%",
               alignItems: "center",
             }}
-            onPress={() => navigation.navigate("ChooseArtistScreen")}
+            onPress={handleClickCreateAccount}
           >
             <Text style={[styles.PrimaryLabel, { color: "#000" }]}>
               Create an account

@@ -7,11 +7,61 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
+import { db } from "../components/firebase";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const SignUpScreen1 = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [emailMessage, setEmailMessage] = useState("");
+  const [passwordMessage, setPasswordMessage] = useState("");
+
+  const checkEmailExistence = async () => {
+    try {
+      console.log(email);
+      const usersRef = collection(db, "users");
+      const q = query(usersRef, where("email", "==", email));
+      const querySnapshot = await getDocs(q);
+
+      if (!querySnapshot.empty) {
+        setEmailMessage("This email is already registered.");
+      } else {
+        setEmailMessage("You'll need to confirm this email later.");
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleNext = async () => {
+    const emailExists = await checkEmailExistence();
+    if (!emailExists) {
+      navigation.navigate("SignUpScreen2", {
+        email: email,
+        password: password,
+      });
+    }
+  };
+
+  const checkEmailAndPassword = () => {
+    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$/;
+    const regexPassword =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
+    if (!regexEmail.test(email)) {
+      setEmailMessage("Invalid email address.");
+      return false;
+    } else if (regexEmail.test(email) && regexPassword.test(password)) {
+      setEmailMessage("You'll need to confirm this email later.");
+      setPasswordMessage("Password is valid.");
+    } else if (!regexPassword.test(password)) {
+      setPasswordMessage(
+        "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters."
+      );
+      return false;
+    }
+    return true;
+  };
 
   return (
     <View style={styles.container}>
@@ -27,9 +77,7 @@ const SignUpScreen1 = ({ navigation }) => {
             autoCapitalize="none"
           />
         </View>
-        <Text style={styles.label}>
-          You'll need to confirm this email later.
-        </Text>
+        <Text style={styles.label}>{emailMessage}</Text>
 
         {/* Password field */}
         <Text style={styles.PrimaryLabel}>Create a password</Text>
@@ -48,12 +96,12 @@ const SignUpScreen1 = ({ navigation }) => {
             />
           </TouchableOpacity>
         </View>
-        <Text style={styles.label}>Use atleast 8 characters.</Text>
+        <Text style={styles.label}>{passwordMessage}</Text>
+
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
           <TouchableOpacity
-            // disabled={email.length || password.length < 8 ? true : false}
             style={{
               backgroundColor: "#ccc",
               borderRadius: 30,
@@ -61,7 +109,9 @@ const SignUpScreen1 = ({ navigation }) => {
               width: "100%",
               alignItems: "center",
             }}
-            onPress={() => navigation.navigate("SignUpScreen2")}
+            onPress={() => {
+              handleNext(); // Call the validation function
+            }}
           >
             <Text style={[styles.PrimaryLabel, { color: "#000" }]}>Next</Text>
           </TouchableOpacity>
@@ -86,19 +136,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    backgroundColor: "#7777",
-  },
   inputPass: {
     flex: 1,
     height: 50,
@@ -114,7 +151,6 @@ const styles = StyleSheet.create({
     fontSize: 12,
     marginBottom: 5,
     color: "#fff", // Optional: change color to gray
-    // fontWeight: "bold",
   },
 });
 
