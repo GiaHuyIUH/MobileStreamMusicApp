@@ -18,7 +18,7 @@ const LogInScreen = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       await signInWithEmailAndPassword(auth, email, password);
-      navigation.navigate("HomeScreen");
+      navigation.replace("Main");
     } catch (error) {
       console.log(error);
     }

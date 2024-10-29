@@ -8,6 +8,7 @@ import ChooseArtistScreen from "../screens/ChooseArtistScreen";
 import LogInScreen from "../screens/LogInScreen";
 import LogInNotPassScreen from "../screens/LogInNotPassScreen";
 import HomeScreen from "../screens/HomeScreen";
+import TabNavigator from "./TabNavigator";
 
 const Stack = createStackNavigator();
 
@@ -64,9 +65,14 @@ const LoginStackNavigator = () => {
           component={LogInNotPassScreen}
           options={{ ...setting, headerTitle: "Log in without password" }}
         />
-        <Stack.Screen
+        {/* <Stack.Screen
           name="HomeScreen"
           component={HomeScreen}
+          options={{ headerShown: false }}
+        /> */}
+        <Stack.Screen
+          name="Main"
+          component={TabNavigator} // Use TabNavigator here
           options={{ headerShown: false }}
         />
       </Stack.Navigator>

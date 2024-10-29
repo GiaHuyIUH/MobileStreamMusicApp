@@ -10,9 +10,17 @@ import {
 } from "react-native";
 import { auth, db } from "../components/firebase";
 import { doc, getDoc } from "firebase/firestore";
+import { FlatList } from "react-native";
+
+let limit = 10;
+let loadMore = false;
 
 const HomeScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
+  const [trending, setTrending] = useState([]);
+
+  const [skip, setSkip] = useState(0);
+
   const fetchUserData = async (currentUser) => {
     try {
       // Only attempt to fetch data if there is a logged-in user
@@ -33,11 +41,26 @@ const HomeScreen = ({ navigation }) => {
     }
   };
 
+  const fetchData = async () => {
+    let query = `?skip=${skip}&limit=${limit}`;
+    try {
+      const response = await fetch(
+        "https://api-zingmp3.vercel.app/api/home" + query
+      );
+      const data = await response.json();
+      setTrending(data.items[0].items);
+      console.log("Data:", data.items[0].items);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       console.log("Auth state changed: ", currentUser);
       if (currentUser) {
         await fetchUserData(currentUser);
+        await fetchData();
       } else {
         setUser(null); // Ensure user state is cleared when no user is logged in
       }
@@ -59,38 +82,19 @@ const HomeScreen = ({ navigation }) => {
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollContainer}>
-        //{" "}
-        <View style={styles.container}>
-          //{" "}
-          {user && (
-            <View>
-              <Text>User Name: {user.userName}</Text>
-              <Text>Email: {user.email}</Text>
-              <Text>Gender: {user.gender}</Text>
-              <Text>Avatar: {user.avatar}</Text>
-            </View>
-          )}
-          <TouchableOpacity onPress={handleLogout}>
-            <Text>Log out</Text>
-          </TouchableOpacity>
-        </View>
-        {/* Header Section */}
+        <TouchableOpacity onPress={handleLogout}>
+          <Text>LOG OUT</Text>
+        </TouchableOpacity>
         <View style={styles.header}>
-          <Text style={styles.headerText}>Recently played</Text>
-          <View style={styles.headerIcons}>
-            <Image
-              source={{ uri: "../assets/images/Vector.png" }}
-              style={styles.icon}
-            />
-            <Image
-              source={{ uri: "../assets/images/orientation lock.png" }}
-              style={styles.icon}
-            />
-            <Image
-              source={{ uri: "../assets/images/Settings.png" }}
-              style={styles.icon}
-            />
-          </View>
+          <Text style={styles.headerText}>Trending</Text>
+          <FlatList
+            data={trending}
+            keyExtractor={(item) => item.id.toString()}
+            horizontal={true}
+            renderItem={({ item }) => (
+              <Image source={{ uri: item.image }} style={styles.icon} />
+            )}
+          />
         </View>
         {/* Image Grid */}
         <View style={styles.imageGrid}>
