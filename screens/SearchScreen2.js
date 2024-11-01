@@ -1,221 +1,275 @@
-import React from "react";
-import { SafeAreaView, ScrollView, View, Text, Image, TextInput, StyleSheet, TouchableOpacity } from "react-native";
+import React, { useState } from "react";
+import {
+  View,
+  TextInput,
+  FlatList,
+  Text,
+  Image,
+  StyleSheet,
+  TouchableOpacity,
+  SafeAreaView,
+  ScrollView,
+} from "react-native";
+import Ionicons from "react-native-vector-icons/Ionicons";
 
-export default (SearchScreen2) => {
+const SearchScreen2 = () => {
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+  const [editable, setEditable] = useState(true);
+
+  const handleSearch = (text) => {
+    setQuery(text);
+    const simulatedResults = [
+      { id: "1", title: "FKA twigs", type: "Artist", image: "https://via.placeholder.com/50" },
+      { id: "2", title: "Hozier", type: "Artist", image: "https://via.placeholder.com/50" },
+      { id: "3", title: "Grimes", type: "Artist", image: "https://via.placeholder.com/50" },
+    ].filter((item) => item.title.toLowerCase().includes(text.toLowerCase()));
+    setResults(simulatedResults);
+  };
+
+  const handleCancel = () => {
+    setQuery("");
+    setResults([]);
+    setEditable(false);
+    setTimeout(() => setEditable(true), 0);
+  };
+
+  const genres = [
+    { id: "1", title: "Pop", color: "#D147A3", image: "https://via.placeholder.com/100" },
+    { id: "2", title: "Indie", color: "#73A942", image: "https://via.placeholder.com/100" },
+  ];
+
+  const podcasts = [
+    { id: "1", title: "News & Politics", color: "#4B93FC", image: "https://via.placeholder.com/100" },
+    { id: "2", title: "Comedy", color: "#E14D2A", image: "https://via.placeholder.com/100" },
+  ];
+
+  const browseAll = [
+    { id: "1", title: "2021 Wrapped", color: "#9DAF08", image: "https://via.placeholder.com/100" },
+    { id: "2", title: "Podcasts", color: "#1E50A2", image: "https://via.placeholder.com/100" },
+    { id: "3", title: "Made for you", color: "#71A6D2", image: "https://via.placeholder.com/100" },
+    { id: "4", title: "Charts", color: "#E67232", image: "https://via.placeholder.com/100" },
+  ];
+
+  const renderGenreItem = ({ item }) => (
+    <View style={[styles.genreBox, { backgroundColor: item.color }]}>
+      <Text style={styles.genreText}>{item.title}</Text>
+      <Image source={{ uri: item.image }} style={styles.genreImage} />
+    </View>
+  );
+
+  const renderPodcastItem = ({ item }) => (
+    <View style={[styles.genreBox, { backgroundColor: item.color }]}>
+      <Text style={styles.genreText}>{item.title}</Text>
+      <Image source={{ uri: item.image }} style={styles.genreImage} />
+    </View>
+  );
+
+  const renderBrowseItem = ({ item }) => (
+    <View style={[styles.genreBox, { backgroundColor: item.color, width: "48%" }]}>
+      <Text style={styles.genreText}>{item.title}</Text>
+      <Image source={{ uri: item.image }} style={styles.genreImage} />
+    </View>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView style={styles.scrollView}>
-        {/* Search Bar */}
-        <View style={styles.searchContainer}>
-          <Text style={styles.searchText}>Search</Text>
-          <View style={styles.searchBar}>
-            <TextInput placeholder="Artists, songs, or podcasts" placeholderTextColor="#B0B0B0" style={styles.searchInput} />
-          </View>
-        </View>
+      {/* Thanh tìm kiếm cố định */}
+      <View style={styles.searchContainer}>
+        <Text style={styles.searchTitle}>Search</Text>
+        <TouchableOpacity style={styles.cameraIcon}>
+          <Ionicons name="camera-outline" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
+      
+      <View style={styles.searchBar}>
+        <Ionicons name="search-outline" size={20} color="#888" style={styles.searchIcon} />
+        <TextInput
+          style={styles.searchInput}
+          placeholder="Artists, songs, or podcasts"
+          placeholderTextColor="#888"
+          value={query}
+          editable={editable}
+          onChangeText={handleSearch}
+        />
+      </View>
 
+      {/* Nội dung có thể cuộn */}
+      <ScrollView showsVerticalScrollIndicator={false}>
         {/* Your Top Genres */}
         <Text style={styles.sectionTitle}>Your top genres</Text>
-        <View style={styles.genreContainer}>
-          <View style={styles.genreBox}>
-          <Image source={{ uri: "../assets/images/Pop.png" }} style={styles.albumImage} />
-            <Text style={styles.genreText}>Pop</Text>
-          </View>
-          <View style={styles.genreBox}>
-            <Image source={{ uri: "../assets/images/Pop.png" }} style={styles.albumImage} />
-            <Text style={styles.genreText}>Indie</Text>
-          </View>
-        </View>
+        <FlatList
+          data={genres}
+          renderItem={renderGenreItem}
+          keyExtractor={(item) => item.id}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.genreContainer}
+        />
 
         {/* Popular Podcast Categories */}
         <Text style={styles.sectionTitle}>Popular podcast categories</Text>
-        <View style={styles.genreContainer}>
-          <View style={[styles.genreBox, styles.blueBox]}>
-            <Text style={styles.genreText}>News & Politics</Text>
-          </View>
-          <View style={[styles.genreBox, styles.redBox]}>
-            <Text style={styles.genreText}>Comedy</Text>
-          </View>
-        </View>
+        <FlatList
+          data={podcasts}
+          renderItem={renderPodcastItem}
+          keyExtractor={(item) => item.id}
+          horizontal={true}
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={styles.genreContainer}
+        />
 
-        {/* Browse All Section */}
+        {/* Browse All */}
         <Text style={styles.sectionTitle}>Browse all</Text>
-        <View style={styles.genreContainer}>
-          <View style={styles.genreBox}>
-            <Image source={{ uri: "../assets/images/Artist2.png" }} style={styles.albumImage} />
-            <Text style={styles.genreText}>2021 Wrapped</Text>
-          </View>
-          <View style={styles.genreBox}>
-          <Image source={{ uri: "../assets/images/Artist1.png" }} style={styles.albumImage} />
-            <Text style={styles.genreText}>Podcasts</Text>
-          </View>
-        </View>
-
-        <View style={styles.genreContainer}>
-          <View style={styles.genreBox}>
-          <Image source={{ uri: "../assets/images/Artist3.png" }} style={styles.albumImage} />
-            <Text style={styles.genreText}>Made for you</Text>
-          </View>
-          <View style={styles.genreBox}>
-          <Image source={{ uri: "../assets/images/album2.png" }} style={styles.albumImage} />
-            <Text style={styles.genreText}>Charts</Text>
-          </View>
-        </View>
+        <FlatList
+          data={browseAll}
+          renderItem={renderBrowseItem}
+          keyExtractor={(item) => item.id}
+          numColumns={2}
+          columnWrapperStyle={styles.browseAllContainer}
+          contentContainerStyle={{ paddingBottom: 20 }}
+        />
       </ScrollView>
 
-      {/* Now Playing Section */}
-      <View style={styles.nowPlaying}>
+      {/* Footer hiển thị bài hát đang phát */}
+      <View style={styles.footerPlayer}>
         <Image
-          source={{ uri: "../assets/images/Artist1.png" }} 
-          style={styles.nowPlayingImage}
+          source={{ uri: "https://via.placeholder.com/50" }}
+          style={styles.footerImage}
         />
-        <View style={styles.nowPlayingTextContainer}>
-          <Text style={styles.nowPlayingText} numberOfLines={1}>
+        <View style={styles.footerTextContainer}>
+          <Text style={styles.footerSongTitle} numberOfLines={1}>
             Easy - Troye Sivan
           </Text>
-          <Text style={styles.nowPlayingSubtext}>BEAST!!!</Text>
+          <Text style={styles.footerDeviceName}>BEATSPILL+</Text>
         </View>
-        <TouchableOpacity>
-          <Image
-            source={{ uri: "https://e7.pngegg.com/pngimages/261/757/png-clipart-computer-icons-google-play-music-button-play-angle-rectangle-thumbnail.png" }} // Replace with the pause button icon
-            style={styles.nowPlayingControl}
-          />
-        </TouchableOpacity>
+        <Ionicons name="bluetooth" size={20} color="#1DB954" style={styles.footerIcon} />
+        <Ionicons name="pause" size={24} color="#fff" style={styles.footerIcon} />
       </View>
-
-      {/* Bottom Navigation */}
-      <View style={styles.bottomNavigation}>
-        <TouchableOpacity style={styles.navItem}>
-          <Image source={{ uri: "../assets/images/Homeicon.png" }} style={styles.navIcon} />
-          <Text style={styles.navText}>Home</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Image source={{ uri: "../assets/images/Searchicon.png" }} style={styles.navIcon} />
-          <Text style={styles.navText}>Search</Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity style={styles.navItem}>
-          <Image source={{ uri: "../assets/images/libraryicon.png" }} style={styles.navIcon} />
-          <Text style={styles.navText}>Your Library</Text>
-        </TouchableOpacity>
+      <View style={styles.progressBarContainer}>
+        <View style={styles.progressBar} />
       </View>
     </SafeAreaView>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#000",
-  },
-  scrollView: {
-    paddingHorizontal: 15,
+    backgroundColor: "#121212",
+    paddingHorizontal: 16,
   },
   searchContainer: {
-    paddingTop: 20,
-    marginBottom: 20,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 20,
   },
-  searchText: {
-    fontSize: 24,
+  searchTitle: {
     color: "#fff",
+    fontSize: 24,
     fontWeight: "bold",
-    marginBottom: 10,
+  },
+  cameraIcon: {
+    paddingRight: 10,
   },
   searchBar: {
     flexDirection: "row",
-    backgroundColor: "#121212",
-    borderRadius: 8,
+    alignItems: "center",
+    backgroundColor: "#fff",
+    borderRadius: 10,
     paddingHorizontal: 10,
-    paddingVertical: 8,
+    height: 40,
+    marginBottom: 20,
+  },
+  searchIcon: {
+    marginRight: 8,
+    color: "#888",
   },
   searchInput: {
-    color: "#fff",
     flex: 1,
+    color: "#000",
   },
   sectionTitle: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 16,
     fontWeight: "bold",
+    marginTop: 20,
     marginBottom: 10,
   },
   genreContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
     marginBottom: 20,
   },
+  browseAllContainer: {
+    justifyContent: "space-between",
+  },
   genreBox: {
-    width: "48%",
-    height: 100,
-    backgroundColor: "#1E1E1E",
+    width: 150,
+    height: 120,
     justifyContent: "center",
     alignItems: "center",
     borderRadius: 10,
-  },
-  blueBox: {
-    backgroundColor: "#4B93FC",
-  },
-  redBox: {
-    backgroundColor: "#E14D2A",
+    marginRight: 10,
+    marginBottom: 10,
+    padding: 10,
   },
   genreText: {
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
-  },
-  albumImage: {
-    width: 100,
-    height: 70,
     marginBottom: 5,
   },
-  nowPlaying: {
+  genreImage: {
+    width: "80%",
+    height: 60,
+    resizeMode: "contain",
+    marginTop: 5,
+  },
+  footerPlayer: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#121212",
+    backgroundColor: "#1C1C1C",
     paddingVertical: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 16,
     borderTopWidth: 1,
     borderTopColor: "#282828",
+    borderRadius: 10,
+    marginHorizontal: 16,
+    marginBottom: 5,
   },
-  nowPlayingImage: {
-    width: 50,
-    height: 50,
+  footerImage: {
+    width: 40,
+    height: 40,
+    borderRadius: 5,
     marginRight: 10,
   },
-  nowPlayingTextContainer: {
+  footerTextContainer: {
     flex: 1,
   },
-  nowPlayingText: {
+  footerSongTitle: {
     color: "#fff",
-    fontSize: 16,
+    fontSize: 14,
     fontWeight: "bold",
   },
-  nowPlayingSubtext: {
-    color: "#B0B0B0",
-    fontSize: 14,
-  },
-  nowPlayingControl: {
-    width: 24,
-    height: 24,
-  },
-  bottomNavigation: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    backgroundColor: "#000",
-    paddingVertical: 15,
-    borderTopWidth: 1,
-    borderTopColor: "#282828",
-  },
-  navItem: {
-    flex: 1,
-    alignItems: "center",
-  },
-  navIcon: {
-    width: 24,
-    height: 24,
-    marginBottom: 5,
-  },
-  navText: {
-    color: "#fff",
+  footerDeviceName: {
+    color: "#1DB954",
     fontSize: 12,
   },
+  footerIcon: {
+    marginLeft: 15,
+  },
+  progressBarContainer: {
+    height: 3,
+    backgroundColor: "#555",
+    borderRadius: 2,
+    marginHorizontal: 16,
+    marginBottom: 10,
+  },
+  progressBar: {
+    width: "60%", 
+    height: "100%",
+    backgroundColor: "#1DB954",
+    borderRadius: 2,
+  },
 });
+
+export default SearchScreen2;

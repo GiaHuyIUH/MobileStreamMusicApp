@@ -9,53 +9,111 @@ import {
   Image,
   TouchableOpacity,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
+import Checkbox from "expo-checkbox"; // Importing Expo's Checkbox component
 
-const App = () => {
+const SignUpScreen2 = ({ navigation }) => {
+  const [email, setEmail] = useState("");
+  const [selectedGender, setSelectedGender] = useState("");
+  const [isCheckedNews, setIsCheckedNews] = useState(false);
+  const [isCheckedMarketing, setIsCheckedMarketing] = useState(false);
+
   return (
     <SafeAreaView style={styles.container}>
       <ScrollView contentContainerStyle={styles.scrollView}>
         {/* Search Bar */}
         <View style={styles.searchContainer}>
           <TextInput
-            placeholder="Artists, songs, or podcasts"
-            placeholderTextColor="#B3B3B3"
-            style={styles.searchInput}
+            style={styles.inputPass}
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+            autoCapitalize="none"
           />
         </View>
+        <Text style={styles.label}>
+          You'll need to confirm this email later.
+        </Text>
 
-        {/* Your Top Genres */}
-        <Text style={styles.sectionTitle}>Your top genres</Text>
-        <ScrollView horizontal showsHorizontalScrollIndicator={false}>
-          {topGenres.map((genre, index) => (
-            <TouchableOpacity key={index} style={[styles.genreCard, { backgroundColor: genre.color }]}>
-              <Image source={{ uri: genre.image }} style={styles.genreImage} />
-              <Text style={styles.genreText}>{genre.name}</Text>
-            </TouchableOpacity>
-          ))}
-        </ScrollView>
-
-        {/* Popular Podcast Categories */}
-        <Text style={styles.sectionTitle}>Popular podcast categories</Text>
-        <View style={styles.categoryContainer}>
-          {podcastCategories.map((category, index) => (
-            <TouchableOpacity key={index} style={[styles.categoryCard, { backgroundColor: category.color }]}>
-              <Image source={{ uri: category.icon }} style={styles.categoryIcon} />
-              <Text style={styles.categoryText}>{category.name}</Text>
-              <Text style={styles.categorySubtitle}>Album</Text>
-            </TouchableOpacity>
-          ))}
+        {/* Password field */}
+        <Text style={styles.PrimaryLabel}>What's your gender?</Text>
+        <View style={styles.inputContainer}>
+          <Picker
+            selectedValue={selectedGender}
+            style={styles.picker}
+            onValueChange={(itemValue, itemIndex) =>
+              setSelectedGender(itemValue)
+            }
+          >
+            <Picker.Item label="Select Gender" value="" />
+            <Picker.Item label="Male" value="male" />
+            <Picker.Item label="Female" value="female" />
+            <Picker.Item label="Other" value="other" />
+          </Picker>
         </View>
+        {/* Divider */}
+        <View style={styles.divider} />
 
-        {/* Browse All */}
-        <Text style={styles.sectionTitle}>Browse all</Text>
-        <View style={styles.categoryContainer}>
-          {browseAll.map((item, index) => (
-            <TouchableOpacity key={index} style={[styles.categoryCard, { backgroundColor: item.color }]}>
-              <Image source={{ uri: item.icon }} style={styles.categoryIcon} />
-              <Text style={styles.categoryText}>{item.name}</Text>
-              <Text style={styles.categorySubtitle}>Album</Text>
-            </TouchableOpacity>
-          ))}
+        <View style={styles.containerTerm}>
+          {/* Terms of Use Text */}
+          <Text style={styles.termsText}>
+            By tapping on "Create account", you agree to the spotify Terms of
+            Use.
+          </Text>
+
+          <TouchableOpacity>
+            <Text style={styles.linkText}>Terms of Use</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.privacyText}>
+            To learn more about how Spotify collects, uses, shares and protects
+            your personal data, Please see the Spotify Privacy Policy.
+          </Text>
+
+          <TouchableOpacity>
+            <Text style={styles.linkText}>Privacy Policy</Text>
+          </TouchableOpacity>
+
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxLabel}>
+              Please send me news and offers from Spotify.
+            </Text>
+            <Checkbox
+              value={isCheckedNews}
+              onValueChange={setIsCheckedNews}
+              color={isCheckedNews ? "#1DB954" : undefined} // Custom color when checked
+            />
+          </View>
+
+          <View style={styles.checkboxContainer}>
+            <Text style={styles.checkboxLabel}>
+              Share my registration data with Spotify's content.
+            </Text>
+            <Checkbox
+              value={isCheckedMarketing}
+              onValueChange={setIsCheckedMarketing}
+              color={isCheckedMarketing ? "#1DB954" : undefined} // Custom color when checked
+            />
+          </View>
+        </View>
+        <View
+          style={{ flex: 1, alignItems: "center", justifyContent: "flex-end" }}
+        >
+          <TouchableOpacity
+            // disabled={email.length || password.length < 8 ? true : false}
+            style={{
+              backgroundColor: "#ccc",
+              borderRadius: 30,
+              padding: 15,
+              width: "100%",
+              alignItems: "center",
+            }}
+            onPress={() => navigation.navigate("ChooseArtistScreen")}
+          >
+            <Text style={[styles.PrimaryLabel, { color: "#000" }]}>
+              Create an account
+            </Text>
+          </TouchableOpacity>
         </View>
       </ScrollView>
 
@@ -183,4 +241,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default App;
+export default SignUpScreen2;

@@ -7,11 +7,22 @@ import {
   TouchableOpacity,
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
+import { signInWithEmailAndPassword } from "firebase/auth";
+import { auth } from "../components/firebase";
 
 const LogInScreen = ({ navigation }) => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleLogin = async () => {
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.replace("Main");
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <View style={styles.container}>
@@ -61,6 +72,7 @@ const LogInScreen = ({ navigation }) => {
               width: "100%",
               alignItems: "center",
             }}
+            onPress={handleLogin}
           >
             <Text style={[styles.PrimaryLabel, { color: "#000" }]}>Log in</Text>
           </TouchableOpacity>

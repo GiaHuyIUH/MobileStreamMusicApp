@@ -1,30 +1,24 @@
+// App.js
 import React from "react";
-import { Text, View, ActivityIndicator, SafeAreaView } from "react-native";
-import { useFonts } from "expo-font";
-import LoginStackNavigator from "./navigations/LoginStackNavigator";
-import HomeScreen from "./screens/HomeScreen";
-import SearchScreen1 from "./screens/SearchScreen1";
-import SearchScreen2 from "./screens/SearchScreen2";
+import { NavigationContainer } from "@react-navigation/native";
+import { createStackNavigator } from "@react-navigation/stack";
+import TabNavigator from "./navigations/TabNavigator";
 import AlbumViewScreen from "./screens/AlbumViewScreen";
 import AlbumControlScreen from "./screens/AlbumControlScreen";
-import TrackViewScreen from "./screens/TrackViewScreen";
-import TrackScreen from "./screens/TrackScreen";
-import LibraryScreen from "./screens/LibraryScreen";
+
+const Stack = createStackNavigator();
 
 export default function App() {
-  // Load the font
-  const [fontsLoaded] = useFonts({
-    MyFont: require("./assets/fonts/MyFont.ttf"),
-  });
-
-  if (!fontsLoaded) {
-    return <ActivityIndicator size="large" color="#0000ff" />;
-  }
-
   return (
-    <>
-      <LibraryScreen />
-      
-    </>
+    // <NavigationContainer>
+    //   <Stack.Navigator screenOptions={{ headerShown: false }}>
+       
+    //     <Stack.Screen name="MainTabs" component={TabNavigator} />
+        
+   
+    //     <Stack.Screen name="AlbumView" component={AlbumViewScreen} />
+    //   </Stack.Navigator>
+    // </NavigationContainer>
+    <AlbumControlScreen/>
   );
 }
