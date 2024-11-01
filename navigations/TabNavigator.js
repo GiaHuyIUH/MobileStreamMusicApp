@@ -1,10 +1,10 @@
 import React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
+import { Ionicons } from "@expo/vector-icons";
 import HomeScreen from "../screens/HomeScreen";
 import SearchScreen2 from "../screens/SearchScreen2";
 import LibraryScreen from "../screens/LibraryScreen";
-import AlbumViewScreen from "../screens/AlbumViewScreen"; // Import AlbumViewScreen
-import { Ionicons } from "@expo/vector-icons"; // For tab icons
+import PlaylistSearchScreen from "../screens/PlaylistSearchScreen"; // Import PlaylistSearchScreen
 
 const Tab = createBottomTabNavigator();
 
@@ -21,7 +21,7 @@ const TabNavigator = () => {
             iconName = focused ? "search" : "search-outline";
           } else if (route.name === "Library") {
             iconName = focused ? "library" : "library-outline";
-          } 
+          }
 
           return (
             <Ionicons
@@ -41,10 +41,19 @@ const TabNavigator = () => {
         },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }}/>
-      <Tab.Screen name="Search" component={SearchScreen2} options={{ headerShown: false }}/>
-      <Tab.Screen name="Library" component={LibraryScreen} options={{ headerShown: false }}/>
-      
+      <Tab.Screen name="Home" component={HomeScreen} options={{ headerShown: false }} />
+      <Tab.Screen name="Search" component={SearchScreen2} options={{ headerShown: false }} />
+      <Tab.Screen name="Library" component={LibraryScreen} options={{ headerShown: false }} />
+
+      {/* Thêm PlaylistSearchScreen nhưng ẩn nó khỏi tab bar */}
+      <Tab.Screen
+        name="PlaylistSearch"
+        component={PlaylistSearchScreen}
+        options={{
+          tabBarButton: () => null, // Ẩn tab này khỏi thanh điều hướng
+          headerShown: false,
+        }}
+      />
     </Tab.Navigator>
   );
 };

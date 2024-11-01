@@ -1,78 +1,64 @@
-import React from 'react';
-import { SafeAreaView, View, Text, Image, TouchableOpacity, StyleSheet, ScrollView } from 'react-native';
+import React from "react";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  FlatList,
+  StyleSheet,
+} from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
-export default (TrackScreen) => {
+const TrackControlScreen = () => {
+  const trackData = {
+    cover:
+      "https://s.yimg.com/ny/api/res/1.2/FyXeLDYArJFx_jRfVZIKNw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDA-/https://media.zenfs.com/en/insider_articles_922/3cfb307db10dee35818faf40ebd4c8c6",
+    title: "1 (Remastered)",
+    artist: "The Beatles",
+  };
+
+  const controls = [
+    { id: "1", icon: "heart-outline", name: "Like" },
+    { id: "2", icon: "eye-off-outline", name: "Hide song" },
+    { id: "3", icon: "playlist-music-outline", name: "Add to playlist" },
+    { id: "4", icon: "playlist-plus", name: "Add to queue" },
+    { id: "5", icon: "share-outline", name: "Share" },
+    { id: "6", icon: "radio", name: "Go to radio" },
+    { id: "7", icon: "album", name: "View album" },
+    { id: "8", icon: "account-music", name: "View artist" },
+    { id: "9", icon: "music-circle-outline", name: "Song credits" },
+    { id: "10", icon: "moon-waning-crescent", name: "Sleep timer" },
+  ];
+
+  const renderControlItem = ({ item }) => (
+    <TouchableOpacity style={styles.controlItem}>
+      <MaterialCommunityIcons name={item.icon} size={24} color="#fff" />
+      <Text style={styles.controlText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
   return (
     <SafeAreaView style={styles.container}>
-      <ScrollView contentContainerStyle={styles.scrollViewContainer}>
-        {/* Album Info */}
-        <View style={styles.albumInfo}>
-          <Image
-            source={require('../assets/images/Artist1.png')} // Use require for local images
-            style={styles.albumCover}
-          />
-          <Text style={styles.albumTitle}>1 (Remastered)</Text>
-          <Text style={styles.artistName}>The Beatles</Text>
-        </View>
+      {/* Header with album cover and title */}
+      <View style={styles.header}>
+        <Image source={{ uri: trackData.cover }} style={styles.albumCover} />
+        <Text style={styles.albumTitle}>{trackData.title}</Text>
+        <Text style={styles.artistName}>{trackData.artist}</Text>
+      </View>
 
-        {/* Options List */}
-        <View style={styles.optionList}>
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/hearticon.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Like</Text>
-          </TouchableOpacity>
+      {/* FlatList to render control items */}
+      <FlatList
+        data={controls}
+        renderItem={renderControlItem}
+        keyExtractor={(item) => item.id}
+        contentContainerStyle={styles.listContainer}
+      />
 
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/hide.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Hide song</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/addplaylist.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Add to playlist</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/addqueue.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Add to queue</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/share.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Share</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/radio.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Go to radio</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/viewalbum.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>View album</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/viewartist.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>View artist</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/songcredits.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Song credits</Text>
-          </TouchableOpacity>
-
-          <TouchableOpacity style={styles.optionItem}>
-            <Image source={require('../assets/images/sleeptimer.png')} style={styles.optionIcon} />
-            <Text style={styles.optionLabel}>Sleep timer</Text>
-          </TouchableOpacity>
-        </View>
-
-        {/* Close Button */}
-        <TouchableOpacity style={styles.closeButton}>
-          <Text style={styles.closeButtonText}>Close</Text>
-        </TouchableOpacity>
-      </ScrollView>
+      {/* Close Button */}
+      <TouchableOpacity style={styles.closeButton}>
+        <Text style={styles.closeButtonText}>Close</Text>
+      </TouchableOpacity>
     </SafeAreaView>
   );
 };
@@ -80,66 +66,54 @@ export default (TrackScreen) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#000', // Dark background to resemble the music app theme
+    backgroundColor: "#121212",
   },
-  scrollViewContainer: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    paddingVertical: 20, // Adjust padding for proper alignment
-  },
-  albumInfo: {
-    alignItems: 'center',
-    marginBottom: 20, // Adjust for spacing between album info and options
+  header: {
+    alignItems: "center",
+    paddingVertical: 20,
   },
   albumCover: {
     width: 150,
     height: 150,
-    marginBottom: 20,
-    borderRadius: 8,
+    borderRadius: 10,
+    marginBottom: 15,
   },
   albumTitle: {
-    fontSize: 22, // Adjusted size for better appearance
-    color: '#FFF',
-    fontWeight: 'bold',
-    textAlign: 'center', // Center align the album title text
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   artistName: {
-    fontSize: 14, // Match the font size for the artist name
-    color: '#B0B0B0',
+    fontSize: 16,
+    color: "#B0B0B0",
     marginTop: 5,
+    textAlign: "center",
   },
-  optionList: {
-    width: '100%',
-    paddingHorizontal: 20, // Adjust padding to center the list of options
+  listContainer: {
+    paddingHorizontal: 20,
   },
-  optionItem: {
-    flexDirection: 'row',
-    alignItems: 'center',
+  controlItem: {
+    flexDirection: "row",
+    alignItems: "center",
     paddingVertical: 15,
     borderBottomWidth: 1,
-    borderBottomColor: '#282828', // Grey divider between items
+    borderBottomColor: "#282828",
   },
-  optionIcon: {
-    width: 25,
-    height: 25,
-    marginRight: 20, // Adjust spacing between icon and text
-  },
-  optionLabel: {
+  controlText: {
     fontSize: 16,
-    color: '#FFF', // White text for better contrast
+    color: "#fff",
+    marginLeft: 15,
   },
   closeButton: {
-    marginTop: 30,
-    paddingVertical: 10,
-    paddingHorizontal: 60, // Adjust padding for better appearance
-    backgroundColor: '#1DB954', // Green close button similar to the Spotify theme
-    borderRadius: 50,
+    alignItems: "center",
+    paddingVertical: 15,
+    marginBottom: 20,
   },
   closeButtonText: {
+    color: "#fff",
     fontSize: 16,
-    color: '#FFF',
-    fontWeight: 'bold',
-    textAlign: 'center',
   },
 });
+
+export default TrackControlScreen;

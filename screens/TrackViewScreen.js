@@ -1,311 +1,232 @@
 import React from "react";
-import { SafeAreaView, View, ScrollView, Image, Text, StyleSheet } from "react-native";
+import {
+  SafeAreaView,
+  View,
+  Text,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
+import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import Slider from "@react-native-community/slider";
 
-export default (TrackViewScreen) => {
-    return (
-        <SafeAreaView style={styles.safeArea}>
-            <ScrollView style={styles.scrollView}>
-                <View style={styles.container}>
-                    {/* Header without gradient background */}
-                    <View style={styles.header}>
-                        <View style={styles.headerRow}>
-                            {/* Left icon */}
-                            <Image
-                                source={{ uri: "../assets/images/listicon.png" }}
-                                resizeMode={"stretch"}
-                                style={styles.iconSmall}
-                            />
-                            <Text style={styles.headerTitle}>{"1(Remastered)"}</Text>
-                            {/* Right icon */}
-                            <Image
-                                source={{ uri: "../assets/images/3dots.png" }}
-                                resizeMode={"stretch"}
-                                style={styles.iconTiny}
-                            />
-                        </View>
+const TrackViewScreen = () => {
+  // Thêm dữ liệu thời gian vào trackData
+  const trackData = {
+    cover:
+      "https://s.yimg.com/ny/api/res/1.2/FyXeLDYArJFx_jRfVZIKNw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDA-/https://media.zenfs.com/en/insider_articles_922/3cfb307db10dee35818faf40ebd4c8c6",
+    album: "1 (Remastered)",
+    title: "From Me to You - Mono / Remast",
+    artist: "The Beatles",
+    startTime: "0:38",  
+    endTime: "-1:18",     
+  };
 
-                        {/* Main image */}
-                        <Image
-                            source={{ uri: "../assets/images/Artist1.png" }}
-                            resizeMode={"stretch"}
-                            style={styles.mainImage}
-                        />
+  const renderControlButtons = () => (
+    <View style={styles.controlsContainer}>
+      <TouchableOpacity>
+        <MaterialCommunityIcons name="shuffle" size={24} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Ionicons name="play-skip-back-outline" size={24} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity style={styles.playButton}>
+        <Ionicons name="pause-circle-outline" size={64} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <Ionicons name="play-skip-forward-outline" size={24} color="#fff" />
+      </TouchableOpacity>
+      <TouchableOpacity>
+        <MaterialCommunityIcons name="repeat" size={24} color="#1DB954" />
+      </TouchableOpacity>
+    </View>
+  );
 
-                        {/* Song details */}
-                        <View style={styles.songDetails}>
-                            <View style={styles.songInfo}>
-                                <Text style={styles.songTitle}>{"From Me to You - Mono / Remast"}</Text>
-                                <Text style={styles.songArtist}>{"The Beatles"}</Text>
-                            </View>
-                            <Image
-                                source={{ uri: "../assets/images/hearticon.png" }}
-                                resizeMode={"stretch"}
-                                style={styles.iconMedium}
-                            />
-                        </View>
+  return (
+    <SafeAreaView style={styles.container}>
+      {/* Header */}
+      <View style={styles.header}>
+        <TouchableOpacity>
+          <Ionicons name="chevron-down" size={24} color="#fff" />
+        </TouchableOpacity>
+        <Text style={styles.albumTitle}>{trackData.album}</Text>
+        <TouchableOpacity>
+          <Ionicons name="ellipsis-horizontal" size={24} color="#fff" />
+        </TouchableOpacity>
+      </View>
 
-                        {/* Progress bar */}
-                        <View style={styles.progressBarContainer}>
-                            <View style={styles.progressBarBackground}>
-                                <View style={styles.progressBarForeground} />
-                            </View>
-                        </View>
+      {/* Album Cover */}
+      <Image source={{ uri: trackData.cover }} style={styles.albumCover} />
 
-                        {/* Time display */}
-                        <View style={styles.timeContainer}>
-                            <Text style={styles.timeText}>{"0:38"}</Text>
-                            <Text style={styles.timeText}>{"-1:18"}</Text>
-                        </View>
+      {/* Track Info */}
+      <View style={styles.trackInfo}>
+        <Text style={styles.trackTitle}>{trackData.title}</Text>
+        <Text style={styles.trackArtist}>{trackData.artist}</Text>
+      </View>
 
-                        {/* Controls */}
-                        <View style={styles.controls}>
-                            <Image
-                                source={{ uri: "../assets/images/download.png" }}
-                                resizeMode={"stretch"}
-                                style={styles.iconControl}
-                            />
-                            <Image
-                                source={{ uri: "../assets/images/redirect_inadvance.png" }}
-                                resizeMode={"stretch"}
-                                style={styles.iconControl}
-                            />
-                            <View style={styles.playPauseContainer}>
-                                <Image
-                                    source={{ uri: "../assets/images/playicon.png" }}
-                                    resizeMode={"stretch"}
-                                    style={styles.playPauseIcon}
-                                />
-                            </View>
-                            <Image
-                                source={{ uri: "../assets/images/redirect_next.png" }}
-                                resizeMode={"stretch"}
-                                style={styles.iconControl}
-                            />
-                            <Image
-                                source={{ uri: "../assets/images/resume.png" }}
-                                resizeMode={"stretch"}
-                                style={styles.iconControl}
-                            />
-                        </View>
+      {/* Progress Slider */}
+      <View style={styles.progressContainer}>
+        <Slider
+          style={{ width: "100%", height: 40 }}
+          minimumValue={0}
+          maximumValue={1}
+          minimumTrackTintColor="#1DB954"
+          maximumTrackTintColor="#fff"
+          thumbTintColor="#1DB954"
+        />
+        {/* Render thời gian từ dữ liệu track */}
+        <View style={styles.progressTime}>
+          <Text style={styles.timeText}>{trackData.startTime}</Text>
+          <Text style={styles.timeText}>{trackData.endTime}</Text>
+        </View>
+      </View>
 
-                        {/* Footer */}
-                        <View style={styles.footer}>
-                            <View style={styles.footerLeft}>
-                                <Image
-                                    source={{ uri: "../assets/images/bluetooth.png" }}
-                                    resizeMode={"stretch"}
-                                    style={styles.iconSmall}
-                                />
-                                <Text style={styles.footerText}>{"BEATSPILL+"}</Text>
-                            </View>
-                            <View style={styles.footerRight}>
-                                <Image
-                                    source={{ uri: "../assets/images/share.png" }}  
-                                    resizeMode={"stretch"}
-                                    style={styles.iconControl}
-                                />
-                                <Image
-                                    source={{ uri: "../assets/images/displaylist.png" }}
-                                    resizeMode={"stretch"}
-                                    style={styles.iconLarge}
-                                />
-                            </View>
-                        </View>
-                    </View>
+      {/* Control Buttons */}
+      {renderControlButtons()}
 
-                    {/* Lyrics section */}
-                    <View style={styles.lyricsContainer}>
-                        <View style={styles.lyricsRow}>
-                            <Text style={styles.lyricsText}>{"Lyrics"}</Text>
-                            <View style={styles.moreButton}>
-                                <Text style={styles.moreText}>{"MORE"}</Text>
-                                <Image
-                                    source={{ uri: "../assets/images/zoom.png" }}
-                                    resizeMode={"stretch"}
-                                    style={styles.iconTiny}
-                                />
-                            </View>
-                        </View>
-                    </View>
-                </View>
-            </ScrollView>
-        </SafeAreaView>
-    );
-}
+      {/* Footer Info */}
+      <View style={styles.footer}>
+        <Text style={styles.footerSource}>BEATSPILL+</Text>
+        <View style={styles.footerIcons}>
+          <TouchableOpacity>
+            <Ionicons name="heart-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+          <TouchableOpacity>
+            <Ionicons name="share-outline" size={24} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* Lyrics and More Button */}
+      <View style={styles.lyricsContainer}>
+        <TouchableOpacity style={styles.lyricsButton}>
+          <Text style={styles.lyricsText}>Lyrics</Text>
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.moreButton}>
+          <Text style={styles.moreText}>MORE</Text>
+        </TouchableOpacity>
+      </View>
+    </SafeAreaView>
+  );
+};
 
 const styles = StyleSheet.create({
-    safeArea: {
-        flex: 1,
-        backgroundColor: "#FFFFFF",
-    },
-    scrollView: {
-        flex: 1,
-        backgroundColor: "#121212",
-    },
-    container: {
-        flex: 1,
-        alignItems: 'center',  // Ensures that the container centers its children
-    },
-    header: {
-        backgroundColor: "#962419", 
-        paddingTop: 58,
-        paddingBottom: 70,
-        width: '100%',  
-        alignItems: 'center',
-    },
-    headerRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: 'space-between',
-        width: '90%',  
-    },
-    iconSmall: {
-        width: 24,
-        height: 24,
-    },
-    iconTiny: {
-        width: 20,
-        height: 20,
-    },
-    headerTitle: {
-        color: "#FFFFFF",
-        fontSize: 18,
-        fontWeight: "bold",
-    },
-    mainImage: {
-        height: 360,
-        width: '90%',  
-        marginBottom: 40,
-    },
-    songDetails: {
-        flexDirection: "row",
-        justifyContent: 'space-between',
-        width: '90%',
-        marginBottom: 15,
-    },
-    songInfo: {
-        flex: 1,
-    },
-    songTitle: {
-        color: "#FFFFFF",
-        fontSize: 22,
-        fontWeight: "bold",
-        marginBottom: 6,
-    },
-    songArtist: {
-        color: "#B3B3B3",
-        fontSize: 16,
-        fontWeight: "bold",
-    },
-    iconMedium: {
-        width: 30,
-        height: 30,
-        alignSelf: 'center',
-    },
-    progressBarContainer: {
-        width: '90%',
-        marginBottom: 10,
-    },
-    progressBarBackground: {
-        backgroundColor: "#777777",
-        borderRadius: 4,
-        height: 6,
-    },
-    progressBarForeground: {
-        width: 128,
-        height: 6,
-        backgroundColor: "#FFFFFF",
-        borderRadius: 4,
-    },
-    timeContainer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        width: '90%',
-        marginBottom: 10,
-    },
-    timeText: {
-        color: "#B2B2B2",
-        fontSize: 14,
-        fontWeight: "bold",
-    },
-    controls: {
-        flexDirection: "row",
-        justifyContent: "space-evenly",  
-        alignItems: "center",
-        width: '90%',
-        marginBottom: 30,
-    },
-    iconControl: {
-        width: 35,
-        height: 35,
-    },
-    playPauseContainer: {
-        width: 67,
-        height: 67,
-        justifyContent: "center",
-        alignItems: "center",
-        borderRadius: 35,
-        backgroundColor: "#FFFFFF",
-    },
-    playPauseIcon: {
-        width: 40,
-        height: 40,
-    },
-    footer: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        width: '90%',
-        marginBottom: 30,
-    },
-    footerLeft: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    footerRight: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    footerText: {
-        color: "#17B54E",
-        fontSize: 12,
-        marginLeft: 5,  
-    },
-    iconLarge: {
-        width: 20,
-        height: 25,
-        marginLeft: 15, 
-    },
-    lyricsContainer: {
-        marginTop: 20,
-        backgroundColor: "#D8672A",
-        borderRadius: 7,
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        width: '90%',
-    },
-    lyricsRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-    lyricsText: {
-        color: "#FFFFFF",
-        fontSize: 20,
-        fontWeight: "bold",
-    },
-    moreButton: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        backgroundColor: "#6B3311",
-        borderRadius: 21,
-        paddingVertical: 10,
-        paddingHorizontal: 15,
-    },
-    moreText: {
-        color: "#FFFFFF",
-        fontSize: 12,
-        fontWeight: "bold",
-    }
+  container: {
+    flex: 1,
+    backgroundColor: "#121212",
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: 20,
+  },
+  albumTitle: {
+    color: "#fff",
+    fontSize: 16,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  albumCover: {
+    width: 300,
+    height: 300,
+    alignSelf: "center",
+    marginVertical: 20,
+  },
+  trackInfo: {
+    alignItems: "center",
+    paddingHorizontal: 20,
+    marginBottom: 10,
+  },
+  trackTitle: {
+    color: "#fff",
+    fontSize: 20,
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  trackArtist: {
+    color: "#B0B0B0",
+    fontSize: 16,
+    textAlign: "center",
+    marginTop: 5,
+  },
+  progressContainer: {
+    paddingHorizontal: 20,
+  },
+  progressTime: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    paddingHorizontal: 10,
+    marginTop: -10, 
+  },
+  timeText: {
+    color: "#B0B0B0",
+    fontSize: 12,
+  },
+  controlsContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-around",
+    paddingVertical: 20,
+  },
+  playButton: {
+    alignItems: "center",
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingBottom: 20,
+    marginTop: 10,
+  },
+  footerSource: {
+    color: "#1DB954",
+    fontSize: 14,
+  },
+  footerIcons: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 20,
+  },
+  lyricsContainer: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    backgroundColor: "#282828",
+    borderRadius: 10,
+    marginHorizontal: 20,
+    marginBottom: 20,
+  },
+  lyricsButton: {
+    backgroundColor: "#FFA500",
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    flex: 1,
+    marginRight: 10,
+  },
+  lyricsText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+  },
+  moreButton: {
+    backgroundColor: "#404040",
+    borderRadius: 8,
+    paddingHorizontal: 20,
+    paddingVertical: 10,
+    flex: 1,
+  },
+  moreText: {
+    color: "#fff",
+    fontWeight: "bold",
+    fontSize: 16,
+    textAlign: "center",
+  },
 });
+
+export default TrackViewScreen;
