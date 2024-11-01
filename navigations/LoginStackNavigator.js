@@ -16,6 +16,12 @@ export default function App() {
         
         {/* Define the AlbumViewScreen */}
         <Stack.Screen name="AlbumView" component={AlbumViewScreen} />
+        <Stack.Screen
+        name="PlaylistSearch"
+        component={PlaylistSearchScreen}
+        options={{ headerShown: true, title: "Playlist Search" }}
+      />
+
       </Stack.Navigator>
     </NavigationContainer>
   );

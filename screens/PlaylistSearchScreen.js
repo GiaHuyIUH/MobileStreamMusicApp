@@ -10,8 +10,11 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native"; // Import useNavigation
 
 const PlaylistSearchScreen = () => {
+  const navigation = useNavigation(); // Sử dụng useNavigation để lấy navigation
+
   const playlistData = {
     cover: "https://via.placeholder.com/300",
     title: "Indie Pop",
@@ -46,7 +49,7 @@ const PlaylistSearchScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Header with Back, Search, and Sort */}
       <View style={styles.header}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
         <View style={styles.searchContainer}>
@@ -119,6 +122,31 @@ const PlaylistSearchScreen = () => {
           <Ionicons name="pause" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
+
+      {/* Footer Navigation */}
+      <View style={styles.footer}>
+        <TouchableOpacity
+          style={styles.footerIconContainer}
+          onPress={() => navigation.navigate("MainTabs", { screen: "Home" })}
+        >
+          <Ionicons name="home-outline" size={24} color="#fff" />
+          <Text style={styles.footerText}>Home</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.footerIconContainer}
+          onPress={() => navigation.navigate("MainTabs", { screen: "Search" })}
+        >
+          <Ionicons name="search-outline" size={24} color="#fff" />
+          <Text style={styles.footerText}>Search</Text>
+        </TouchableOpacity>
+        <TouchableOpacity
+          style={styles.footerIconContainer}
+          onPress={() => navigation.navigate("MainTabs", { screen: "Library" })}
+        >
+          <Ionicons name="library-outline" size={24} color="#fff" />
+          <Text style={styles.footerText}>Your Library</Text>
+        </TouchableOpacity>
+      </View>
     </SafeAreaView>
   );
 };
@@ -141,7 +169,6 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     paddingHorizontal: 10,
     marginLeft: 10,
-    
     flex: 1,
   },
   searchInput: {
@@ -204,9 +231,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     marginLeft: 5,
-    marginTop: 10,
-  },
-  nowPlayingBar: {
     marginTop: 10,
   },
   iconSpacing: {
@@ -274,6 +298,26 @@ const styles = StyleSheet.create({
   nowPlayingSource: {
     color: "#1DB954",
     fontSize: 12,
+  },
+  footer: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    paddingVertical: 10,
+    backgroundColor: "#121212",
+    borderTopWidth: 1,
+    borderTopColor: "#282828",
+    position: "absolute",
+    bottom: 0,
+    left: 0,
+    right: 0,
+  },
+  footerIconContainer: {
+    alignItems: "center",
+  },
+  footerText: {
+    color: "#fff",
+    fontSize: 12,
+    marginTop: 4,
   },
 });
 

@@ -10,6 +10,7 @@ import TrackControlScreen from "./screens/TrackScreen";
 import SongShareScreen from "./screens/SongShareScreen";
 import AlbumRadioScreen from "./screens/AlbumRadioScreen";
 import PlaylistSearchScreen from "./screens/PlaylistSearchScreen";
+import ListeningScreen from "./screens/ListeningScreen";
 
 const Stack = createStackNavigator();
 
@@ -17,28 +18,27 @@ export default function App() {
   return (
     // <NavigationContainer>
     //   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    //     <Stack.Screen name="MainTabs" component={TabNavigator} />   
+    //     {/* <Stack.Screen name="MainTabs" component={TabNavigator} />    */}
     //     <Stack.Screen name="PlaylistSearch" component={PlaylistSearchScreen} />
     //   </Stack.Navigator>
     // </NavigationContainer>
-    // <AlbumControlScreen/>
-    // <TrackViewScreen/>
-    // <TrackControlScreen/>
-    // <SongShareScreen/>
-    // <AlbumRadioScreen/>
-    // <NavigationContainer>
-    //   <TabNavigator/>
-    // </NavigationContainer>
-    // <PlaylistSearchScreen/>
 
     // <NavigationContainer>
     //   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    //     {/* Hiển thị trực tiếp PlaylistSearchScreen */}
-    //     <Stack.Screen name="PlaylistSearch" component={PlaylistSearchScreen} />
+    //     {/* Tab Navigator */}
+    //     <Stack.Screen name="MainTabs" component={TabNavigator} />
+        
+    //     {/* Màn hình AlbumViewScreen */}
+    //     {/* <Stack.Screen name="AlbumView" component={AlbumViewScreen} /> */}
+
+    //     {/* Màn hình PlaylistSearchScreen */}
+    //     <Stack.Screen
+    //       name="PlaylistSearch"
+    //       component={PlaylistSearchScreen}
+    //       options={{ headerShown: true, title: "Playlist Search" }}
+    //     />
     //   </Stack.Navigator>
     // </NavigationContainer>
-<NavigationContainer>
-      <TabNavigator />
-    </NavigationContainer>
+    <ListeningScreen />
   );
 }

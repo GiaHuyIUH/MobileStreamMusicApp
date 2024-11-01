@@ -46,14 +46,7 @@ const TabNavigator = () => {
       <Tab.Screen name="Library" component={LibraryScreen} options={{ headerShown: false }} />
 
       {/* Thêm PlaylistSearchScreen nhưng ẩn nó khỏi tab bar */}
-      <Tab.Screen
-        name="PlaylistSearch"
-        component={PlaylistSearchScreen}
-        options={{
-          tabBarButton: () => null, // Ẩn tab này khỏi thanh điều hướng
-          headerShown: false,
-        }}
-      />
+      
     </Tab.Navigator>
   );
 };
