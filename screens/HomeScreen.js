@@ -9,6 +9,8 @@ import {
   ActivityIndicator,
   Dimensions,
   FlatList,
+  StatusBar,
+  Platform,
 } from "react-native";
 import { auth, db } from "../components/firebase";
 import { doc, getDoc } from "firebase/firestore";
@@ -20,6 +22,7 @@ const HomeScreen = ({ navigation }) => {
   const [homeData, setHomeData] = useState(null);
   const [loading, setLoading] = useState(true);
   const flatListRef = useRef(null);
+  const bannerListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
@@ -98,8 +101,8 @@ const HomeScreen = ({ navigation }) => {
   }, [homeData]);
 
   useEffect(() => {
-    if (flatListRef.current && homeData && homeData.length > 0) {
-      flatListRef.current.scrollToIndex({
+    if (bannerListRef.current && homeData && homeData.length > 0) {
+      bannerListRef.current.scrollToIndex({
         index: currentIndex,
         animated: true,
       });
@@ -141,8 +144,61 @@ const HomeScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  const renderSection = ({ item }) => {
+    if (item.sectionType === "banner") {
+      return (
+        <FlatList
+          ref={bannerListRef}
+          data={item.items}
+          renderItem={({ item }) => <BannerItem item={item} />}
+          keyExtractor={(item) => item.encodeId}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          onScrollToIndexFailed={(info) => {
+            const wait = new Promise((resolve) => setTimeout(resolve, 500));
+            wait.then(() => {
+              bannerListRef.current?.scrollToIndex({
+                index: info.index,
+                animated: true,
+              });
+            });
+          }}
+        />
+      );
+    } else {
+      return (
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>{item.title}</Text>
+          <FlatList
+            horizontal={true}
+            data={
+              item.sectionType === "new-release"
+                ? item.items?.all || []
+                : item.items || []
+            }
+            renderItem={({ item }) => (
+              <TouchableOpacity style={styles.itemContainer}>
+                <Image
+                  source={{
+                    uri: item.thumbnailM,
+                  }}
+                  style={styles.itemImage}
+                />
+                <Text numberOfLines={2} style={styles.itemTitle}>
+                  {item.title}
+                </Text>
+              </TouchableOpacity>
+            )}
+            keyExtractor={(item, index) => index.toString()}
+          />
+        </View>
+      );
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
+      <StatusBar barStyle="light-content" />
       <Header title={getCurrentTime()} navigation={navigation} />
       <TouchableOpacity onPress={handleLogout}>
         <Text>LOG OUT</Text>
@@ -152,11 +208,9 @@ const HomeScreen = ({ navigation }) => {
       ) : (
         <FlatList
           ref={flatListRef}
-          data={bannerItems[0].items}
-          renderItem={({ item }) => <BannerItem item={item} />}
-          keyExtractor={(item) => item.encodeId}
-          horizontal
-          showsHorizontalScrollIndicator={false}
+          data={homeData}
+          renderItem={renderSection}
+          keyExtractor={(item, index) => index.toString()}
         />
       )}
     </SafeAreaView>
@@ -167,6 +221,7 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#121212",
     flex: 1,
+    paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     padding: 15,
   },
   bannerContainer: {
@@ -186,6 +241,27 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     borderRadius: 15,
+  },
+  section: {
+    marginBottom: 20,
+  },
+  sectionTitle: {
+    color: "#fff",
+    fontSize: 18,
+    marginBottom: 10,
+  },
+  itemContainer: {
+    marginRight: 15,
+  },
+  itemImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 10,
+  },
+  itemTitle: {
+    color: "#fff",
+    marginTop: 5,
+    width: 100,
   },
 });
 
