@@ -11,11 +11,13 @@ import {
   ScrollView,
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import { useNavigation } from "@react-navigation/native";
 
 const SearchScreen2 = () => {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState([]);
   const [editable, setEditable] = useState(true);
+  const navigation = useNavigation();
 
   const handleSearch = (text) => {
     setQuery(text);
@@ -51,30 +53,43 @@ const SearchScreen2 = () => {
     { id: "4", title: "Charts", color: "#E67232", image: "https://via.placeholder.com/100" },
   ];
 
+  // Hàm điều hướng đến AlbumViewScreen với dữ liệu của item
+  const navigateToAlbumView = (item) => {
+    navigation.navigate("AlbumView", { item }); // Điều hướng tới AlbumViewScreen và truyền dữ liệu item
+  };
+
   const renderGenreItem = ({ item }) => (
-    <View style={[styles.genreBox, { backgroundColor: item.color }]}>
+    <TouchableOpacity
+      style={[styles.genreBox, { backgroundColor: item.color }]}
+      onPress={() => navigateToAlbumView(item)} // Điều hướng khi nhấn vào item
+    >
       <Text style={styles.genreText}>{item.title}</Text>
       <Image source={{ uri: item.image }} style={styles.genreImage} />
-    </View>
+    </TouchableOpacity>
   );
 
   const renderPodcastItem = ({ item }) => (
-    <View style={[styles.genreBox, { backgroundColor: item.color }]}>
+    <TouchableOpacity
+      style={[styles.genreBox, { backgroundColor: item.color }]}
+      onPress={() => navigateToAlbumView(item)} // Điều hướng khi nhấn vào item
+    >
       <Text style={styles.genreText}>{item.title}</Text>
       <Image source={{ uri: item.image }} style={styles.genreImage} />
-    </View>
+    </TouchableOpacity>
   );
 
   const renderBrowseItem = ({ item }) => (
-    <View style={[styles.genreBox, { backgroundColor: item.color, width: "48%" }]}>
+    <TouchableOpacity
+      style={[styles.genreBox, { backgroundColor: item.color, width: "48%" }]}
+      onPress={() => navigateToAlbumView(item)} // Điều hướng khi nhấn vào item
+    >
       <Text style={styles.genreText}>{item.title}</Text>
       <Image source={{ uri: item.image }} style={styles.genreImage} />
-    </View>
+    </TouchableOpacity>
   );
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Thanh tìm kiếm cố định */}
       <View style={styles.searchContainer}>
         <Text style={styles.searchTitle}>Search</Text>
         <TouchableOpacity style={styles.cameraIcon}>
@@ -94,9 +109,7 @@ const SearchScreen2 = () => {
         />
       </View>
 
-      {/* Nội dung có thể cuộn */}
       <ScrollView showsVerticalScrollIndicator={false}>
-        {/* Your Top Genres */}
         <Text style={styles.sectionTitle}>Your top genres</Text>
         <FlatList
           data={genres}
@@ -107,7 +120,6 @@ const SearchScreen2 = () => {
           contentContainerStyle={styles.genreContainer}
         />
 
-        {/* Popular Podcast Categories */}
         <Text style={styles.sectionTitle}>Popular podcast categories</Text>
         <FlatList
           data={podcasts}
@@ -118,7 +130,6 @@ const SearchScreen2 = () => {
           contentContainerStyle={styles.genreContainer}
         />
 
-        {/* Browse All */}
         <Text style={styles.sectionTitle}>Browse all</Text>
         <FlatList
           data={browseAll}
@@ -130,7 +141,6 @@ const SearchScreen2 = () => {
         />
       </ScrollView>
 
-      {/* Footer hiển thị bài hát đang phát */}
       <View style={styles.footerPlayer}>
         <Image
           source={{ uri: "https://via.placeholder.com/50" }}

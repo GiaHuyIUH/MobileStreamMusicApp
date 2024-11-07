@@ -9,8 +9,11 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const TrackControlScreen = () => {
+  const navigation = useNavigation();
+
   const trackData = {
     cover:
       "https://s.yimg.com/ny/api/res/1.2/FyXeLDYArJFx_jRfVZIKNw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDA-/https://media.zenfs.com/en/insider_articles_922/3cfb307db10dee35818faf40ebd4c8c6",
@@ -25,14 +28,22 @@ const TrackControlScreen = () => {
     { id: "4", icon: "playlist-plus", name: "Add to queue" },
     { id: "5", icon: "share-outline", name: "Share" },
     { id: "6", icon: "radio", name: "Go to radio" },
-    { id: "7", icon: "album", name: "View album" },
+    {
+      id: "7",
+      icon: "album",
+      name: "View album",
+      onPress: () => navigation.navigate("AlbumRadioScreen", { album: trackData }),
+    },
     { id: "8", icon: "account-music", name: "View artist" },
     { id: "9", icon: "music-circle-outline", name: "Song credits" },
     { id: "10", icon: "moon-waning-crescent", name: "Sleep timer" },
   ];
 
   const renderControlItem = ({ item }) => (
-    <TouchableOpacity style={styles.controlItem}>
+    <TouchableOpacity
+      style={styles.controlItem}
+      onPress={item.onPress} // Thêm sự kiện chuyển hướng cho biểu tượng album
+    >
       <MaterialCommunityIcons name={item.icon} size={24} color="#fff" />
       <Text style={styles.controlText}>{item.name}</Text>
     </TouchableOpacity>
@@ -56,7 +67,7 @@ const TrackControlScreen = () => {
       />
 
       {/* Close Button */}
-      <TouchableOpacity style={styles.closeButton}>
+      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
         <Text style={styles.closeButtonText}>Close</Text>
       </TouchableOpacity>
     </SafeAreaView>

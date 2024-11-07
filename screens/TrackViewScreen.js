@@ -9,17 +9,19 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
+import { useNavigation } from "@react-navigation/native";
 
 const TrackViewScreen = () => {
-  // Thêm dữ liệu thời gian vào trackData
+  const navigation = useNavigation();
+
   const trackData = {
     cover:
       "https://s.yimg.com/ny/api/res/1.2/FyXeLDYArJFx_jRfVZIKNw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDA-/https://media.zenfs.com/en/insider_articles_922/3cfb307db10dee35818faf40ebd4c8c6",
     album: "1 (Remastered)",
     title: "From Me to You - Mono / Remast",
     artist: "The Beatles",
-    startTime: "0:38",  
-    endTime: "-1:18",     
+    startTime: "0:38",
+    endTime: "-1:18",
   };
 
   const renderControlButtons = () => (
@@ -46,11 +48,11 @@ const TrackViewScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="chevron-down" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.albumTitle}>{trackData.album}</Text>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate('TrackScreen', { track: trackData })}>
           <Ionicons name="ellipsis-horizontal" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -67,14 +69,13 @@ const TrackViewScreen = () => {
       {/* Progress Slider */}
       <View style={styles.progressContainer}>
         <Slider
-          style={{ width: "100%", height: 40 }}
+          style={{ width: "100%", height: 20 }}
           minimumValue={0}
           maximumValue={1}
           minimumTrackTintColor="#1DB954"
           maximumTrackTintColor="#fff"
           thumbTintColor="#1DB954"
         />
-        {/* Render thời gian từ dữ liệu track */}
         <View style={styles.progressTime}>
           <Text style={styles.timeText}>{trackData.startTime}</Text>
           <Text style={styles.timeText}>{trackData.endTime}</Text>
@@ -86,12 +87,20 @@ const TrackViewScreen = () => {
 
       {/* Footer Info */}
       <View style={styles.footer}>
-        <Text style={styles.footerSource}>BEATSPILL+</Text>
+        {/* Bluetooth Icon with Navigation */}
+        <TouchableOpacity
+          style={styles.footerBluetoothContainer}
+          onPress={() => navigation.navigate("ListeningScreen")}
+        >
+          <Ionicons name="bluetooth-outline" size={24} color="#fff" />
+          <Text style={styles.footerSource}>BEATSPILL+</Text>
+        </TouchableOpacity>
+
         <View style={styles.footerIcons}>
           <TouchableOpacity>
             <Ionicons name="heart-outline" size={24} color="#fff" />
           </TouchableOpacity>
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => navigation.navigate('SongShare', { track: trackData })}>
             <Ionicons name="share-outline" size={24} color="#fff" />
           </TouchableOpacity>
         </View>
@@ -128,8 +137,9 @@ const styles = StyleSheet.create({
     textAlign: "center",
   },
   albumCover: {
-    width: 300,
-    height: 300,
+    width: 250,
+    height: 200,
+    borderRadius: 10,
     alignSelf: "center",
     marginVertical: 20,
   },
@@ -157,7 +167,7 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     justifyContent: "space-between",
     paddingHorizontal: 10,
-    marginTop: -10, 
+    marginTop: -10,
   },
   timeText: {
     color: "#B0B0B0",
@@ -180,9 +190,14 @@ const styles = StyleSheet.create({
     paddingBottom: 20,
     marginTop: 10,
   },
+  footerBluetoothContainer: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 5,
+  },
   footerSource: {
     color: "#1DB954",
-    fontSize: 14,
+    fontSize: 12,
   },
   footerIcons: {
     flexDirection: "row",

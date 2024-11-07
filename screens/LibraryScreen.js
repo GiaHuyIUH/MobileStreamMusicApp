@@ -10,7 +10,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 
-const LibraryScreen = () => {
+const LibraryScreen = ({ navigation }) => {
   const sections = [
     {
       id: "1",
@@ -36,7 +36,10 @@ const LibraryScreen = () => {
   ];
 
   const renderLibraryItem = ({ item }) => (
-    <TouchableOpacity style={styles.libraryItem}>
+    <TouchableOpacity
+      style={styles.libraryItem}
+      onPress={() => navigation.navigate("Profile", { item })} // Navigate to ProfileScreen with item data
+    >
       <View style={styles.iconContainer}>
         {item.icon ? (
           <Ionicons name={item.icon} size={24} color={item.color} />
@@ -76,7 +79,7 @@ const LibraryScreen = () => {
           <Text style={styles.filterText}>Albums</Text>
         </TouchableOpacity>
         <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterText}>Podcasts & shows</Text>
+          <Text style={styles.filterText}>Podcasts & Shows</Text>
         </TouchableOpacity>
       </View>
 

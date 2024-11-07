@@ -1,4 +1,6 @@
 import React from "react";
+import { useNavigation } from "@react-navigation/native";
+
 import {
   SafeAreaView,
   View,
@@ -11,6 +13,7 @@ import {
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 
 const AlbumControlScreen = () => {
+  const navigation = useNavigation();
   const albumData = {
     cover:
       "https://s.yimg.com/ny/api/res/1.2/FyXeLDYArJFx_jRfVZIKNw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDA-/https://media.zenfs.com/en/insider_articles_922/3cfb307db10dee35818faf40ebd4c8c6",
@@ -59,7 +62,7 @@ const AlbumControlScreen = () => {
       />
 
       {/* Nút Đóng */}
-      <TouchableOpacity style={styles.closeButton}>
+      <TouchableOpacity style={styles.closeButton} onPress={() => navigation.goBack()}>
         <Text style={styles.closeText}>Close</Text>
       </TouchableOpacity>
     </SafeAreaView>

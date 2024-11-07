@@ -1,3 +1,5 @@
+// AlbumViewScreen.js
+
 import React, { useState } from 'react';
 import { SafeAreaView, View, Text, Image, TouchableOpacity, FlatList, StyleSheet } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
@@ -6,7 +8,6 @@ import { useNavigation } from '@react-navigation/native';
 const AlbumViewScreen = () => {
   const navigation = useNavigation();
 
-  // Thông tin album
   const albumData = {
     cover: 'https://s.yimg.com/ny/api/res/1.2/FyXeLDYArJFx_jRfVZIKNw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDA-/https://media.zenfs.com/en/insider_articles_922/3cfb307db10dee35818faf40ebd4c8c6',
     title: '1 (Remastered)',
@@ -14,7 +15,6 @@ const AlbumViewScreen = () => {
     year: 'Album • 2000',
   };
 
-  // Danh sách bài hát trong album
   const tracks = [
     { id: '1', name: 'Love Me Do - Mono / Remastered', artist: 'The Beatles' },
     { id: '2', name: 'From Me to You - Mono / Remastered', artist: 'The Beatles' },
@@ -22,10 +22,8 @@ const AlbumViewScreen = () => {
     { id: '4', name: 'I Want To Hold Your Hand - Remastered 2015', artist: 'The Beatles' },
   ];
 
-  // Trạng thái bài hát đang phát
   const [playingTrack, setPlayingTrack] = useState(tracks[0]);
 
-  // Render mỗi mục trong danh sách bài hát
   const renderTrack = ({ item }) => (
     <TouchableOpacity onPress={() => setPlayingTrack(item)} style={styles.trackItem}>
       <View style={styles.trackInfo}>
@@ -37,15 +35,18 @@ const AlbumViewScreen = () => {
           </TouchableOpacity>
         </View>
       </View>
-      <TouchableOpacity style={styles.menuIconContainer}>
+      <TouchableOpacity
+        style={styles.menuIconContainer}
+        onPress={() => navigation.navigate('AlbumControl', { track: item })} 
+      >
         <Ionicons name="ellipsis-horizontal" size={20} color="#fff" />
       </TouchableOpacity>
     </TouchableOpacity>
   );
+  
 
   return (
     <SafeAreaView style={styles.container}>
-      {/* Thông tin album */}
       <FlatList
         ListHeaderComponent={
           <>
@@ -62,7 +63,6 @@ const AlbumViewScreen = () => {
               <Text style={styles.albumYear}>{albumData.year}</Text>
             </View>
 
-            {/* Các nút điều khiển */}
             <View style={styles.controls}>
               <View style={styles.iconGroup}>
                 <TouchableOpacity>
@@ -89,7 +89,10 @@ const AlbumViewScreen = () => {
 
       {/* Thanh đang phát */}
       {playingTrack && (
-        <View style={styles.nowPlayingBar}>
+        <TouchableOpacity 
+          style={styles.nowPlayingBar}
+          onPress={() => navigation.navigate('TrackView', { track: playingTrack })}
+        >
           <Image
             source={{ uri: albumData.cover }}
             style={styles.nowPlayingImage}
@@ -102,20 +105,20 @@ const AlbumViewScreen = () => {
           <TouchableOpacity>
             <Ionicons name="pause-circle" size={24} color="#fff" />
           </TouchableOpacity>
-        </View>
+        </TouchableOpacity>
       )}
 
-      {/* Footer với các nút điều hướng */}
+      {/* Footer */}
       <View style={styles.footer}>
-        <TouchableOpacity style={styles.footerIconContainer} onPress={() => navigation.navigate('MainTabs', { screen: 'Home' })}>
+        <TouchableOpacity style={styles.footerIconContainer} onPress={() => navigation.navigate('Main', { screen: 'Home' })}>
           <Ionicons name="home-outline" size={24} color="#fff" />
           <Text style={styles.footerText}>Home</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerIconContainer} onPress={() => navigation.navigate('MainTabs', { screen: 'Search' })}>
+        <TouchableOpacity style={styles.footerIconContainer} onPress={() => navigation.navigate('Main', { screen: 'Search' })}>
           <Ionicons name="search-outline" size={24} color="#fff" />
           <Text style={styles.footerText}>Search</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.footerIconContainer} onPress={() => navigation.navigate('MainTabs', { screen: 'Library' })}>
+        <TouchableOpacity style={styles.footerIconContainer} onPress={() => navigation.navigate('Main', { screen: 'Library' })}>
           <Ionicons name="library-outline" size={24} color="#fff" />
           <Text style={styles.footerText}>Your Library</Text>
         </TouchableOpacity>
@@ -125,6 +128,7 @@ const AlbumViewScreen = () => {
 };
 
 const styles = StyleSheet.create({
+  // Các styles không thay đổi
   container: {
     flex: 1,
     backgroundColor: '#121212',
@@ -214,9 +218,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#282828',
-    paddingVertical: 10,
+    paddingVertical: 12,
     paddingHorizontal: 15,
     position: 'absolute',
+    borderRadius: 10,
     bottom: 55,
     left: 0,
     right: 0,
@@ -224,13 +229,14 @@ const styles = StyleSheet.create({
   nowPlayingImage: {
     width: 40,
     height: 40,
+    borderRadius: 5,
     marginRight: 10,
   },
   nowPlayingInfo: {
     flex: 1,
   },
   nowPlayingTrack: {
-    fontSize: 14,
+    fontSize: 12,
     color: '#fff',
   },
   nowPlayingArtist: {

@@ -11,34 +11,15 @@ import SongShareScreen from "./screens/SongShareScreen";
 import AlbumRadioScreen from "./screens/AlbumRadioScreen";
 import PlaylistSearchScreen from "./screens/PlaylistSearchScreen";
 import ListeningScreen from "./screens/ListeningScreen";
+import RootNavigator from "./navigations/RootNavigator";
 
 const Stack = createStackNavigator();
 
 export default function App() {
   return (
-    // <NavigationContainer>
-    //   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    //     {/* <Stack.Screen name="MainTabs" component={TabNavigator} />    */}
-    //     <Stack.Screen name="PlaylistSearch" component={PlaylistSearchScreen} />
-    //   </Stack.Navigator>
-    // </NavigationContainer>
-
-    // <NavigationContainer>
-    //   <Stack.Navigator screenOptions={{ headerShown: false }}>
-    //     {/* Tab Navigator */}
-    //     <Stack.Screen name="MainTabs" component={TabNavigator} />
-        
-    //     {/* Màn hình AlbumViewScreen */}
-    //     {/* <Stack.Screen name="AlbumView" component={AlbumViewScreen} /> */}
-
-    //     {/* Màn hình PlaylistSearchScreen */}
-    //     <Stack.Screen
-    //       name="PlaylistSearch"
-    //       component={PlaylistSearchScreen}
-    //       options={{ headerShown: true, title: "Playlist Search" }}
-    //     />
-    //   </Stack.Navigator>
-    // </NavigationContainer>
-    <ListeningScreen />
+    
+    <NavigationContainer>
+      <RootNavigator />
+    </NavigationContainer>
   );
 }

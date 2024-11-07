@@ -9,8 +9,11 @@ import {
   StyleSheet,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from "@react-navigation/native";
 
 const AlbumRadioScreen = () => {
+  const navigation = useNavigation();
+  
   const initialNowPlaying = {
     cover:
       "https://s.yimg.com/ny/api/res/1.2/FyXeLDYArJFx_jRfVZIKNw--/YXBwaWQ9aGlnaGxhbmRlcjt3PTEyMDA7aD05MDA-/https://media.zenfs.com/en/insider_articles_922/3cfb307db10dee35818faf40ebd4c8c6",
@@ -46,7 +49,7 @@ const AlbumRadioScreen = () => {
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity style={styles.headerIconLeft}>
+        <TouchableOpacity style={styles.headerIconLeft} onPress={() => navigation.goBack()}>
           <Ionicons name="close-outline" size={24} color="#fff" />
         </TouchableOpacity>
         

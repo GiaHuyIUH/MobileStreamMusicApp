@@ -2,8 +2,10 @@
 import React from "react";
 import { SafeAreaView, View, Text, FlatList, Image, TouchableOpacity, StyleSheet } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
+import { useNavigation } from '@react-navigation/native';
 
 const ListeningScreen = () => {
+  const navigation = useNavigation();
   const devices = [
     { id: "1", name: "BRAVIA 4K GB", type: "Google Cast", icon: "television" },
     { id: "2", name: "Momitha's MacBook Pro", type: "", icon: "laptop" },
@@ -24,7 +26,7 @@ const ListeningScreen = () => {
   return (
     <SafeAreaView style={styles.container}>
       {/* Close Icon */}
-      <TouchableOpacity style={styles.closeIcon}>
+      <TouchableOpacity style={styles.closeIcon} onPress={() => navigation.goBack()}>
         <Ionicons name="close" size={24} color="#FFFFFF" />
       </TouchableOpacity>
 

@@ -127,21 +127,21 @@ const PlaylistSearchScreen = () => {
       <View style={styles.footer}>
         <TouchableOpacity
           style={styles.footerIconContainer}
-          onPress={() => navigation.navigate("MainTabs", { screen: "Home" })}
+          onPress={() => navigation.navigate("Main", { screen: "Home" })}
         >
           <Ionicons name="home-outline" size={24} color="#fff" />
           <Text style={styles.footerText}>Home</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.footerIconContainer}
-          onPress={() => navigation.navigate("MainTabs", { screen: "Search" })}
+          onPress={() => navigation.navigate("Main", { screen: "Search" })}
         >
           <Ionicons name="search-outline" size={24} color="#fff" />
           <Text style={styles.footerText}>Search</Text>
         </TouchableOpacity>
         <TouchableOpacity
           style={styles.footerIconContainer}
-          onPress={() => navigation.navigate("MainTabs", { screen: "Library" })}
+          onPress={() => navigation.navigate("Main", { screen: "Library" })}
         >
           <Ionicons name="library-outline" size={24} color="#fff" />
           <Text style={styles.footerText}>Your Library</Text>
