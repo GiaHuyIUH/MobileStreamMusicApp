@@ -15,7 +15,7 @@ import {
 import { auth, db } from "../components/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { getHomePage } from "../apis/home";
-import Header from "./Header";
+import Header from "../modules/Search/Header";
 
 const HomeScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
@@ -135,9 +135,6 @@ const HomeScreen = ({ navigation }) => {
     return "";
   };
 
-  const bannerItems =
-    homeData?.filter((item) => item.sectionType === "banner") || [];
-
   const BannerItem = ({ item }) => (
     <TouchableOpacity style={styles.bannerContainer}>
       <Image source={{ uri: item.banner }} style={styles.bannerImage} />
@@ -177,7 +174,20 @@ const HomeScreen = ({ navigation }) => {
                 : item.items || []
             }
             renderItem={({ item }) => (
-              <TouchableOpacity style={styles.itemContainer}>
+              <TouchableOpacity
+                style={styles.itemContainer}
+                onPress={() => {
+                  if (item?.link.includes("/bai-hat")) {
+                    navigation.navigate("TrackViewScreen", {
+                      song: item,
+                    });
+                  } else if (item?.link.includes("/playlist")) {
+                    navigation.navigate("PlaylistViewScreen", {
+                      playlist: item.encodeId,
+                    });
+                  }
+                }}
+              >
                 <Image
                   source={{
                     uri: item.thumbnailM,
@@ -200,11 +210,17 @@ const HomeScreen = ({ navigation }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
       <Header title={getCurrentTime()} navigation={navigation} />
-      <TouchableOpacity onPress={handleLogout}>
-        <Text>LOG OUT</Text>
-      </TouchableOpacity>
       {loading ? (
-        <ActivityIndicator size="large" color="#ccc" />
+        <View
+          style={{
+            flex: 1,
+            alignSelf: "center",
+            justifyContent: "center",
+            alignItems: "center",
+          }}
+        >
+          <ActivityIndicator size="large" color="#ccc" />
+        </View>
       ) : (
         <FlatList
           ref={flatListRef}
@@ -247,7 +263,8 @@ const styles = StyleSheet.create({
   },
   sectionTitle: {
     color: "#fff",
-    fontSize: 18,
+    fontSize: 22,
+    fontWeight: "bold",
     marginBottom: 10,
   },
   itemContainer: {
