@@ -1,7 +1,7 @@
 import axios from "axios";
-import { zingmp3Api } from "./constants";
+import { REACT_APP_API_BASE_URL } from "../utils/constant";
 
 export async function getHomePage() {
-  const res = await axios.get(zingmp3Api.getHomePage());
+  const res = await axios.get(`${REACT_APP_API_BASE_URL}/home`);
   return res.data;
 }
