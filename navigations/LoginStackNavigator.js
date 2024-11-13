@@ -9,6 +9,7 @@ import LogInScreen from "../screens/LogInScreen";
 import LogInNotPassScreen from "../screens/LogInNotPassScreen";
 import HomeScreen from "../screens/HomeScreen";
 import TabNavigator from "./TabNavigator";
+import UserSettingScreen from "../screens/UserSettingScreen";
 
 const Stack = createStackNavigator();
 
@@ -71,9 +72,25 @@ const LoginStackNavigator = () => {
           options={{ headerShown: false }}
         /> */}
         <Stack.Screen
-          name="Main"
+          name="MainFlow"
           component={TabNavigator} // Use TabNavigator here
           options={{ headerShown: false }}
+        />
+
+        <Stack.Screen
+          name="UserSettings"
+          component={UserSettingScreen}
+          options={{
+            headerTitle: "Settings",
+            headerTitleAlign: "center",
+            headerStyle: {
+              backgroundColor: "#121212",
+            },
+            headerTintColor: "#fff",
+            headerTitleStyle: {
+              fontWeight: "bold",
+            },
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
