@@ -6,7 +6,7 @@ export async function getLyric(songId) {
     const res = await axios.get(`${REACT_APP_API_BASE_URL}/lyric`, {
       params: { id: songId },
     });
-    return res.data;
+    return res.data.data;
   } catch (error) {
     console.error("Error fetching lyric:", error);
   }
