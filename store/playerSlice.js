@@ -9,6 +9,7 @@ const playerSlice = createSlice({
     audioUrl: "",
     radioUrl: "",
     currentProgress: 0,
+    duration: 0, // Thêm duration để lưu trữ tổng thời lượng bài hát
     showSubPlayer: false,
     isRandom: false,
     isRepeat: false,
@@ -37,6 +38,9 @@ const playerSlice = createSlice({
     setCurrentProgress: (state, action) => {
       state.currentProgress = action.payload;
     },
+    setDuration: (state, action) => {
+      state.duration = action.payload;
+    },
     setShowSubPlayer: (state, action) => {
       state.showSubPlayer = action.payload;
     },
@@ -61,6 +65,13 @@ const playerSlice = createSlice({
     setIsLoading: (state, action) => {
       state.isLoading = action.payload;
     },
+
+    // Action để cập nhật trạng thái audio từ AudioService
+    setAudioState: (state, action) => {
+      state.isPlaying = action.payload.isPlaying;
+      state.currentProgress = action.payload.currentProgress;
+      state.duration = action.payload.duration;
+    },
   },
 });
 
@@ -71,6 +82,7 @@ export const {
   setAudioUrl,
   setRadioUrl,
   setCurrentProgress,
+  setDuration,
   setShowSubPlayer,
   setIsRandom,
   setIsRepeat,
@@ -79,5 +91,6 @@ export const {
   setPlaylistId,
   setIsLove,
   setIsLoading,
+  setAudioState, // Export action mới này
 } = playerSlice.actions;
 export default playerSlice.reducer;
