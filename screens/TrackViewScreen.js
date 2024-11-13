@@ -6,121 +6,183 @@ import {
   Image,
   TouchableOpacity,
   StyleSheet,
+  FlatList,
+  Modal,
+  ScrollView,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { getInfoSong, getSong } from "../apis/song";
-import { Audio } from "expo-av";
+import useLyric from "../hooks/useLyric";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  setShowSubPlayer,
+  setAudioUrl,
+  setShowPlayer,
+  setCurrentProgress,
+} from "../store/playerSlice";
+import AudioService from "../services/AudioService"; // Import AudioService
+import { useNavigation } from "@react-navigation/core";
 
-const TrackViewScreen = ({ route, navigation }) => {
+const TrackViewScreen = () => {
+  const navigation = useNavigation();
+  const singleSong = useSelector((state) => state.player.data);
+  const isPlaying = useSelector((state) => state.player.isPlaying);
+  const currentProgress = useSelector((state) => state.player.currentProgress);
+  const duration = useSelector((state) => state.player.duration);
+  const dispatch = useDispatch();
+  const lyrics = useLyric(singleSong.encodeId);
   const [album, setAlbum] = useState(null);
-  const [sound, setSound] = useState(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-  const [position, setPosition] = useState(0); // Current position
-  const [duration, setDuration] = useState(1); // Total duration
-  const { song } = route.params;
 
-  // Helper function to format milliseconds to mm.ss format
-  const formatTime = (millis) => {
-    const minutes = Math.floor(millis / 60000);
-    const seconds = ((millis % 60000) / 1000).toFixed(0);
-    return `${minutes}.${seconds < 10 ? "0" : ""}${seconds}`;
+  // State để hiển thị modal
+  const [modalVisible, setModalVisible] = useState(false);
+  const [intervalId, setIntervalId] = useState(null); // To store interval ID
+
+  const trackData = {
+    cover: singleSong.thumbnail,
+    title: singleSong.title,
+    artist: singleSong.artistsNames,
   };
+
+  const controls = [
+    { id: "1", icon: "heart-outline", name: "Like" },
+    { id: "2", icon: "eye-off-outline", name: "Hide song" },
+    { id: "3", icon: "playlist-music-outline", name: "Add to playlist" },
+    { id: "4", icon: "playlist-plus", name: "Add to queue" },
+    { id: "5", icon: "share-outline", name: "Share" },
+    { id: "6", icon: "radio", name: "Go to radio" },
+    {
+      id: "7",
+      icon: "album",
+      name: "View album",
+      onPress: () =>
+        navigation.navigate("AlbumRadioScreen", { album: trackData }),
+    },
+    { id: "8", icon: "account-music", name: "View artist" },
+    { id: "9", icon: "music-circle-outline", name: "Song credits" },
+    { id: "10", icon: "moon-waning-crescent", name: "Sleep timer" },
+  ];
+
+  const renderControlItem = ({ item }) => (
+    <TouchableOpacity
+      style={styles.controlItem}
+      onPress={item.onPress} // Thêm sự kiện chuyển hướng cho biểu tượng album
+    >
+      <MaterialCommunityIcons name={item.icon} size={24} color="#fff" />
+      <Text style={styles.controlText}>{item.name}</Text>
+    </TouchableOpacity>
+  );
+
+  // Hàm mở modal
+  const openModal = () => setModalVisible(true);
+
+  // Hàm đóng modal
+  const closeModal = () => setModalVisible(false);
 
   useEffect(() => {
     async function fetchSongDetail() {
       try {
-        const res = await getInfoSong(song.encodeId);
+        const songData = await getSong(singleSong.encodeId); // Lấy URL của bài hát
+        console.log("Song data:", songData.data[128]);
+        const res = await getInfoSong(singleSong.encodeId);
         setAlbum(res.data);
+        dispatch(setAudioUrl(songData.data[128])); // Lưu URL vào Redux
+        await AudioService.loadAudio(songData.data[128]); // Tải bài hát qua AudioService
       } catch (error) {
         console.error("Error fetching song details:", error);
       }
     }
 
     fetchSongDetail();
-  }, []);
-
-  useEffect(() => {
-    return sound
-      ? () => {
-          sound.unloadAsync(); // Unload sound when component unmounts
-        }
-      : undefined;
-  }, [sound]);
-
-  const playSound = async () => {
-    try {
-      const { data } = await getSong(song.encodeId); // Fetch song URL
-      const { sound } = await Audio.Sound.createAsync(
-        { uri: data["128"] },
-        { shouldPlay: true }
-      );
-      setSound(sound);
-      setIsPlaying(true);
-
-      // Update position and duration in real-time
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded) {
-          setPosition(status.positionMillis);
-          setDuration(status.durationMillis || 1); // Prevent division by zero
-          if (status.didJustFinish) {
-            setIsPlaying(false);
-          }
-        }
-      });
-    } catch (error) {
-      console.error("Error playing sound:", error);
-    }
-  };
-
-  const handlePlayPause = async () => {
-    if (sound) {
-      if (isPlaying) {
-        await sound.pauseAsync();
-      } else {
-        await sound.playAsync();
+    // Clean up the interval when the component unmounts or song changes
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
       }
-      setIsPlaying(!isPlaying);
+    };
+  }, [singleSong]);
+
+  // Start/Stop updating the progress when play/pause
+  useEffect(() => {
+    if (isPlaying) {
+      const id = setInterval(async () => {
+        const status = await AudioService.sound.getStatusAsync();
+        if (status.isLoaded) {
+          const position = status.positionMillis;
+          dispatch(setCurrentProgress(position / status.durationMillis));
+        }
+      }, 1000); // Update every second
+      setIntervalId(id); // Save the interval ID for cleanup
     } else {
-      playSound();
+      if (intervalId) {
+        clearInterval(intervalId); // Stop updating progress if paused
+      }
+    }
+
+    return () => {
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [isPlaying, duration]);
+
+  // Hàm phát và tạm dừng
+  const handlePlayPause = async () => {
+    if (isPlaying) {
+      await AudioService.pause(); // Tạm dừng qua AudioService
+    } else {
+      await AudioService.play(); // Phát qua AudioService
     }
   };
 
+  // Hàm xử lý khi kéo thanh tiến trình
   const handleSliderChange = async (value) => {
-    if (sound) {
-      const seekPosition = value * duration;
-      await sound.setPositionAsync(seekPosition);
-      setPosition(seekPosition);
-    }
+    const seekPosition = value * duration;
+    await AudioService.seek(seekPosition); // Tua bài hát qua AudioService
   };
+
+  const formatTime = (millis) => {
+    const minutes = Math.floor(millis / 60000);
+    const seconds = ((millis % 60000) / 1000).toFixed(0);
+    return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
+  };
+
+  const renderLyricItem = ({ item }) => (
+    <View style={styles.lyricItem}>
+      <Text style={styles.lyricText}>{item.data}</Text>
+      <Text style={styles.timeText}>
+        {item.startTime} - {item.endTime}
+      </Text>
+    </View>
+  );
 
   return (
-    <SafeAreaView style={styles.container}>
-      {/* Header */}
+    <ScrollView style={styles.container}>
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => navigation.goBack()}>
+        <TouchableOpacity
+          onPress={() => {
+            dispatch(setShowSubPlayer(true));
+            dispatch(setShowPlayer(false));
+          }}
+        >
           <Ionicons name="chevron-down" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.albumTitle}>{album?.album?.title || "Album"}</Text>
-        <TouchableOpacity
-          onPress={() =>
-            navigation.navigate("TrackControlScreen", { track: album })
-          }
-        >
+        <TouchableOpacity onPress={() => openModal()}>
           <Ionicons name="ellipsis-horizontal" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
 
-      {/* Album Cover */}
-      <Image source={{ uri: song.thumbnailM }} style={styles.albumCover} />
+      <Image
+        source={{ uri: singleSong.thumbnailM }}
+        style={styles.albumCover}
+      />
 
-      {/* Track Info */}
       <View style={styles.trackInfo}>
-        <Text style={styles.trackTitle}>{song.title}</Text>
-        <Text style={styles.trackArtist}>{song.artistsNames}</Text>
+        <Text style={styles.trackTitle}>{singleSong.title}</Text>
+        <Text style={styles.trackArtist}>{singleSong.artistsNames}</Text>
       </View>
 
-      {/* Progress Slider */}
       <View style={styles.progressContainer}>
         <Slider
           style={{ width: "100%", height: 20 }}
@@ -129,21 +191,22 @@ const TrackViewScreen = ({ route, navigation }) => {
           minimumTrackTintColor="#1DB954"
           maximumTrackTintColor="#fff"
           thumbTintColor="#1DB954"
-          value={position / duration}
+          value={currentProgress}
           onSlidingComplete={handleSliderChange}
         />
         <View style={styles.progressTime}>
-          <Text style={styles.timeText}>{formatTime(position)}</Text>
+          <Text style={styles.timeText}>
+            {formatTime(currentProgress * duration)}
+          </Text>
           <Text style={styles.timeText}>{formatTime(duration)}</Text>
         </View>
       </View>
 
-      {/* Control Buttons */}
       <View style={styles.controlsContainer}>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => console.log("Shuffle")}>
           <MaterialCommunityIcons name="shuffle" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => console.log("Previous")}>
           <Ionicons name="play-skip-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
@@ -153,24 +216,58 @@ const TrackViewScreen = ({ route, navigation }) => {
             color="#fff"
           />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => console.log("Next")}>
           <Ionicons name="play-skip-forward-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity>
+        <TouchableOpacity onPress={() => console.log("Repeat")}>
           <MaterialCommunityIcons name="repeat" size={24} color="#1DB954" />
         </TouchableOpacity>
       </View>
 
-      {/* Lyrics and More Button */}
       <View style={styles.lyricsContainer}>
-        <TouchableOpacity style={styles.lyricsButton}>
-          <Text style={styles.lyricsText}>Lyrics</Text>
-        </TouchableOpacity>
-        <TouchableOpacity style={styles.moreButton}>
-          <Text style={styles.moreText}>MORE</Text>
-        </TouchableOpacity>
+        <FlatList
+          data={lyrics}
+          keyExtractor={(item, index) => index.toString()}
+          renderItem={renderLyricItem}
+        />
       </View>
-    </SafeAreaView>
+
+      <Modal
+        animationType="fade"
+        transparent={true}
+        visible={modalVisible}
+        onRequestClose={closeModal}
+      >
+        <View style={styles.modalOverlay}>
+          <ScrollView style={styles.modalContainer}>
+            <View style={styles.header1}>
+              <Image
+                source={{ uri: trackData.cover }}
+                style={styles.albumCover1}
+              />
+              <Text style={styles.albumTitle1}>{trackData.title}</Text>
+              <Text style={styles.artistName}>{trackData.artist}</Text>
+            </View>
+
+            {/* FlatList to render control items */}
+            <FlatList
+              data={controls}
+              renderItem={renderControlItem}
+              keyExtractor={(item) => item.id}
+              contentContainerStyle={styles.listContainer}
+            />
+
+            {/* Close Button */}
+            <TouchableOpacity
+              style={styles.closeButton}
+              onPress={() => closeModal()}
+            >
+              <Text style={styles.closeButtonText}>Close</Text>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </Modal>
+    </ScrollView>
   );
 };
 const styles = StyleSheet.create({
@@ -192,7 +289,7 @@ const styles = StyleSheet.create({
   },
   albumCover: {
     width: "90%",
-    height: "40%",
+    height: 300,
     borderRadius: 10,
     alignSelf: "center",
     marginVertical: 20,
@@ -296,6 +393,80 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 16,
     textAlign: "center",
+  },
+  modalOverlay: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0, 0, 0, 0.5)",
+  },
+  modalContainer: {
+    width: "100%",
+    backgroundColor: "#121212",
+    borderRadius: 10,
+    padding: 20,
+  },
+  lyricItem: {
+    marginBottom: 16,
+  },
+  lyricText: {
+    fontSize: 16,
+    color: "#fff",
+  },
+  timeText: {
+    fontSize: 12,
+    color: "#666",
+  },
+  container1: {
+    flex: 1,
+    backgroundColor: "#121212",
+  },
+  header1: {
+    alignItems: "center",
+    paddingVertical: 20,
+  },
+  albumCover1: {
+    width: 150,
+    height: 150,
+    borderRadius: 10,
+    marginBottom: 15,
+    resizeMode: "contain",
+  },
+  albumTitle1: {
+    fontSize: 20,
+    color: "#fff",
+    fontWeight: "bold",
+    textAlign: "center",
+  },
+  artistName: {
+    fontSize: 16,
+    color: "#B0B0B0",
+    marginTop: 5,
+    textAlign: "center",
+  },
+  listContainer: {
+    paddingHorizontal: 20,
+  },
+  controlItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingVertical: 15,
+    borderBottomWidth: 1,
+    borderBottomColor: "#282828",
+  },
+  controlText: {
+    fontSize: 16,
+    color: "#fff",
+    marginLeft: 15,
+  },
+  closeButton: {
+    alignItems: "center",
+    paddingVertical: 15,
+    marginBottom: 20,
+  },
+  closeButtonText: {
+    color: "#fff",
+    fontSize: 16,
   },
 });
 
