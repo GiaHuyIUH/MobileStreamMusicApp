@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -20,6 +20,10 @@ import {
   setAudioUrl,
   setShowPlayer,
   setCurrentProgress,
+  setIsPlaying,
+  setCurrentSongIndex,
+  setRadioUrl,
+  setPlayerData,
 } from "../store/playerSlice";
 import AudioService from "../services/AudioService"; // Import AudioService
 import { useNavigation } from "@react-navigation/core";
@@ -30,6 +34,14 @@ const TrackViewScreen = () => {
   const isPlaying = useSelector((state) => state.player.isPlaying);
   const currentProgress = useSelector((state) => state.player.currentProgress);
   const duration = useSelector((state) => state.player.duration);
+  const playlist = useSelector((state) => state.player.playlist);
+  const currentSongIndex = useSelector(
+    (state) => state.player.currentSongIndex
+  );
+  const data = useSelector((state) => state.player.data);
+  const isRepeat = useSelector((state) => state.player.isRepeat);
+  const isRandom = useSelector((state) => state.player.isRandom);
+  const isLove = useSelector((state) => state.player.isLove);
   const dispatch = useDispatch();
   const lyrics = useLyric(singleSong.encodeId);
   const [album, setAlbum] = useState(null);
@@ -37,6 +49,9 @@ const TrackViewScreen = () => {
   // State để hiển thị modal
   const [modalVisible, setModalVisible] = useState(false);
   const [intervalId, setIntervalId] = useState(null); // To store interval ID
+
+  const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
+  const flatListRef = useRef(null);
 
   const trackData = {
     cover: singleSong.thumbnail,
@@ -80,21 +95,37 @@ const TrackViewScreen = () => {
   const closeModal = () => setModalVisible(false);
 
   useEffect(() => {
-    async function fetchSongDetail() {
-      try {
-        const songData = await getSong(singleSong.encodeId); // Lấy URL của bài hát
-        console.log("Song data:", songData.data[128]);
-        const res = await getInfoSong(singleSong.encodeId);
-        setAlbum(res.data);
-        dispatch(setAudioUrl(songData.data[128])); // Lưu URL vào Redux
-        await AudioService.loadAudio(songData.data[128]); // Tải bài hát qua AudioService
-      } catch (error) {
-        console.error("Error fetching song details:", error);
+    async function fetchAndPlaySong() {
+      if (
+        singleSong.encodeId &&
+        singleSong.duration > 0 &&
+        singleSong?.streamingStatus === 1
+      ) {
+        if (currentProgress === 0) {
+          try {
+            const songData = await getSong(singleSong.encodeId); // Lấy URL bài hát
+            const res = await getInfoSong(singleSong.encodeId);
+            setAlbum(res.data);
+            dispatch(setAudioUrl(songData.data[128])); // Cập nhật URL vào Redux
+
+            // Tải nhạc và tự động phát khi tải xong
+            await AudioService.loadAudio(songData.data[128]);
+            await AudioService.play(); // Tự động phát nhạc sau khi tải xong
+
+            // Cập nhật trạng thái isPlaying trong Redux sau khi nhạc bắt đầu phát
+            dispatch(setIsPlaying(true));
+          } catch (error) {
+            console.error("Error fetching song details:", error);
+            dispatch(setIsPlaying(false)); // Đặt isPlaying về false nếu có lỗi
+          }
+        } else {
+          await AudioService.play(); // Tự động phát nhạc sau khi tải xong
+        }
       }
     }
 
-    fetchSongDetail();
-    // Clean up the interval when the component unmounts or song changes
+    fetchAndPlaySong();
+
     return () => {
       if (intervalId) {
         clearInterval(intervalId);
@@ -126,14 +157,19 @@ const TrackViewScreen = () => {
     };
   }, [isPlaying, duration]);
 
-  // Hàm phát và tạm dừng
-  const handlePlayPause = async () => {
-    if (isPlaying) {
-      await AudioService.pause(); // Tạm dừng qua AudioService
-    } else {
-      await AudioService.play(); // Phát qua AudioService
+  useEffect(() => {
+    const index = lyrics.findIndex(
+      (lyric) =>
+        currentProgress * duration >= lyric.startTime &&
+        currentProgress * duration < lyric.endTime
+    );
+    if (index !== -1 && index !== currentLyricIndex) {
+      setCurrentLyricIndex(index);
+      if (flatListRef.current) {
+        flatListRef.current.scrollToIndex({ index, animated: true });
+      }
     }
-  };
+  }, [currentProgress, duration]);
 
   // Hàm xử lý khi kéo thanh tiến trình
   const handleSliderChange = async (value) => {
@@ -147,17 +183,79 @@ const TrackViewScreen = () => {
     return `${minutes}:${seconds < 10 ? "0" : ""}${seconds}`;
   };
 
-  const renderLyricItem = ({ item }) => (
-    <View style={styles.lyricItem}>
-      <Text style={styles.lyricText}>{item.data}</Text>
-      <Text style={styles.timeText}>
-        {item.startTime} - {item.endTime}
-      </Text>
-    </View>
+  // Thêm hàm xử lý khi nhấn vào lyric
+  const handleLyricPress = async (startTime) => {
+    try {
+      await AudioService.seek(startTime); // Tua đến thời gian startTime của lyric
+      dispatch(setIsPlaying(true)); // Bắt đầu phát nhạc
+      await AudioService.play(); // Phát nhạc nếu nhạc đang tạm dừng
+    } catch (error) {
+      console.error("Error seeking audio:", error);
+    }
+  };
+
+  const handlePlayPause = async () => {
+    if (isPlaying) {
+      await AudioService.pause();
+      dispatch(setIsPlaying(false));
+    } else {
+      await AudioService.play();
+      dispatch(setIsPlaying(true));
+    }
+  };
+
+  const renderLyricItem = ({ item, index }) => (
+    <TouchableOpacity onPress={() => handleLyricPress(item.startTime)}>
+      <View
+        style={
+          index === currentLyricIndex
+            ? styles.activeLyricItem
+            : styles.lyricItem
+        }
+      >
+        <Text style={styles.lyricText}>{item.data}</Text>
+      </View>
+    </TouchableOpacity>
   );
 
+  // Section to handle Next and Previous song
+  const handleNext = useCallback(() => {
+    if (currentSongIndex < playlist.length - 1) {
+      dispatch(setCurrentProgress(0));
+      dispatch(setCurrentSongIndex(currentSongIndex + 1));
+      dispatch(setAudioUrl(""));
+      dispatch(setRadioUrl(""));
+      dispatch(setPlayerData(playlist[currentSongIndex + 1]));
+      dispatch(setIsPlaying(true));
+    }
+  }, [currentSongIndex, playlist]);
+
+  const handlePrev = useCallback(() => {
+    if (currentSongIndex > 0) {
+      dispatch(setCurrentSongIndex(currentSongIndex - 1));
+      dispatch(setPlayerData(playlist[currentSongIndex - 1]));
+      dispatch(setAudioUrl(""));
+      dispatch(setRadioUrl(""));
+      dispatch(setCurrentProgress(0));
+      dispatch(setIsPlaying(true));
+    }
+  }, [currentSongIndex, playlist]);
+  const handleRepeat = useCallback(() => {
+    dispatch(setCurrentProgress(0));
+  }, []);
+
+  const handleRandomSong = useCallback(() => {
+    const randomIndex = Math.floor(Math.random() * playlist.length);
+    dispatch(setCurrentSongIndex(randomIndex));
+    dispatch(setPlayerData(playlist[randomIndex]));
+    dispatch(setAudioUrl(""));
+    dispatch(setRadioUrl(""));
+    dispatch(setCurrentProgress(0));
+    dispatch(setIsPlaying(true));
+  }, [playlist]);
+
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.header}>
         <TouchableOpacity
           onPress={() => {
@@ -206,7 +304,7 @@ const TrackViewScreen = () => {
         <TouchableOpacity onPress={() => console.log("Shuffle")}>
           <MaterialCommunityIcons name="shuffle" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => console.log("Previous")}>
+        <TouchableOpacity onPress={handlePrev}>
           <Ionicons name="play-skip-back-outline" size={24} color="#fff" />
         </TouchableOpacity>
         <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
@@ -216,20 +314,43 @@ const TrackViewScreen = () => {
             color="#fff"
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => console.log("Next")}>
+        <TouchableOpacity onPress={handleNext}>
           <Ionicons name="play-skip-forward-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => console.log("Repeat")}>
+        <TouchableOpacity onPress={handleRepeat}>
           <MaterialCommunityIcons name="repeat" size={24} color="#1DB954" />
         </TouchableOpacity>
       </View>
 
       <View style={styles.lyricsContainer}>
-        <FlatList
-          data={lyrics}
-          keyExtractor={(item, index) => index.toString()}
-          renderItem={renderLyricItem}
-        />
+        {lyrics.length !== 0 ? (
+          <FlatList
+            ref={flatListRef}
+            data={lyrics}
+            keyExtractor={(item, index) => index.toString()}
+            renderItem={renderLyricItem}
+            extraData={currentLyricIndex}
+            showsVerticalScrollIndicator={false}
+            getItemLayout={(data, index) => ({
+              length: 40,
+              offset: 40 * index,
+              index,
+            })}
+            onScrollToIndexFailed={(info) => {
+              const wait = new Promise((resolve) => setTimeout(resolve, 500));
+              wait.then(() => {
+                flatListRef.current?.scrollToIndex({
+                  index: info.index,
+                  animated: true,
+                });
+              });
+            }}
+          />
+        ) : (
+          <Text style={{ fontSize: 21, fontWeight: 600, color: "#fff" }}>
+            No lyrics available for this song.
+          </Text>
+        )}
       </View>
 
       <Modal
@@ -239,7 +360,7 @@ const TrackViewScreen = () => {
         onRequestClose={closeModal}
       >
         <View style={styles.modalOverlay}>
-          <ScrollView style={styles.modalContainer}>
+          <View style={styles.modalContainer}>
             <View style={styles.header1}>
               <Image
                 source={{ uri: trackData.cover }}
@@ -264,10 +385,10 @@ const TrackViewScreen = () => {
             >
               <Text style={styles.closeButtonText}>Close</Text>
             </TouchableOpacity>
-          </ScrollView>
+          </View>
         </View>
       </Modal>
-    </ScrollView>
+    </View>
   );
 };
 const styles = StyleSheet.create({
@@ -282,10 +403,12 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   albumTitle: {
+    flex: 1,
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
     textAlign: "center",
+    flexWrap: "wrap",
   },
   albumCover: {
     width: "90%",
@@ -324,6 +447,7 @@ const styles = StyleSheet.create({
   timeText: {
     color: "#B0B0B0",
     fontSize: 12,
+    marginTop: 10,
   },
   controlsContainer: {
     flexDirection: "row",
@@ -334,65 +458,17 @@ const styles = StyleSheet.create({
   playButton: {
     alignItems: "center",
   },
-  footer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    paddingHorizontal: 20,
-    paddingBottom: 20,
-    marginTop: 10,
-  },
-  footerBluetoothContainer: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 5,
-  },
-  footerSource: {
-    color: "#1DB954",
-    fontSize: 12,
-  },
   footerIcons: {
     flexDirection: "row",
     alignItems: "center",
     gap: 20,
   },
   lyricsContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flex: 1,
     alignItems: "center",
-    paddingHorizontal: 20,
-    paddingVertical: 10,
     backgroundColor: "#282828",
     borderRadius: 10,
     marginHorizontal: 20,
-    marginBottom: 20,
-  },
-  lyricsButton: {
-    backgroundColor: "#FFA500",
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    flex: 1,
-    marginRight: 10,
-  },
-  lyricsText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    textAlign: "center",
-  },
-  moreButton: {
-    backgroundColor: "#404040",
-    borderRadius: 8,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
-    flex: 1,
-  },
-  moreText: {
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 16,
-    textAlign: "center",
   },
   modalOverlay: {
     flex: 1,
@@ -407,19 +483,13 @@ const styles = StyleSheet.create({
     padding: 20,
   },
   lyricItem: {
-    marginBottom: 16,
+    marginBottom: 10,
   },
   lyricText: {
     fontSize: 16,
     color: "#fff",
-  },
-  timeText: {
-    fontSize: 12,
-    color: "#666",
-  },
-  container1: {
-    flex: 1,
-    backgroundColor: "#121212",
+    fontWeight: "bold",
+    textAlign: "center",
   },
   header1: {
     alignItems: "center",
@@ -467,6 +537,17 @@ const styles = StyleSheet.create({
   closeButtonText: {
     color: "#fff",
     fontSize: 16,
+  },
+  lyricItem: {
+    padding: 10,
+    opacity: 0.6,
+  },
+  activeLyricItem: {
+    width: "100%",
+    padding: 10,
+    backgroundColor: "#525356", // Highlight color for active lyric
+    opacity: 1,
+    borderRadius: 10,
   },
 });
 
