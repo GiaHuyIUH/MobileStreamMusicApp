@@ -27,6 +27,8 @@ class AudioService {
           duration: status.durationMillis,
         })
       );
+    } else {
+      console.error("Playback status not loaded:", status.error);
     }
   };
 
@@ -51,8 +53,48 @@ class AudioService {
   }
 
   async seek(position) {
-    if (this.isLoaded) await this.sound.setPositionAsync(position);
+    if (this.isLoaded && this.sound) {
+      try {
+        await this.sound.setPositionAsync(position); // Set the desired playback position
+        const status = await this.sound.getStatusAsync();
+
+        // Check playback state and resume if playing
+        if (status.isPlaying) {
+          await this.sound.playAsync();
+        }
+      } catch (error) {
+        console.error("Error during seek:", error);
+      }
+    } else {
+      console.warn("Cannot seek: Audio is not loaded.");
+    }
   }
+
+  async playFromStart() {
+    if (this.isLoaded) {
+      await this.sound.setPositionAsync(0); // Reset position to the start
+      await this.sound.playAsync(); // Play the audio
+    }
+  }
+
+  setOnPlaybackStatusUpdate(callback) {
+    if (this.sound) {
+      this.sound.setOnPlaybackStatusUpdate(callback);
+    }
+  }
+
+  // async reset() {
+  //   this.unload(); // Ensure audio is fully unloaded
+  //   this.sound = null; // Clear the sound reference
+  //   this.isLoaded = false; // Reset the loaded state
+  //   store.dispatch(
+  //     setAudioState({
+  //       isPlaying: false,
+  //       currentProgress: 0,
+  //       duration: 0,
+  //     })
+  //   ); // Reset Redux state
+  // }
 }
 
 export default new AudioService();
