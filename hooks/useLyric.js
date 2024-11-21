@@ -5,6 +5,7 @@ const useLyric = (songId) => {
   const [lyr, setLyr] = useState([]);
 
   useEffect(() => {
+    if (!songId) return [];
     const fetchLyric = async () => {
       if (songId !== null && songId !== "") {
         try {
