@@ -409,6 +409,18 @@ const ChooseArtistScreen = ({ navigation }) => {
           key={numColumns}
         />
       </View>
+      <TouchableOpacity
+        style={{
+          backgroundColor: "#ccc",
+          borderRadius: 30,
+          padding: 5,
+          width: "85%",
+          alignItems: "center",
+        }}
+        onPress={() => navigation.navigate("MainFlow")}
+      >
+        <Text style={[styles.PrimaryLabel, { color: "#000" }]}>Next </Text>
+      </TouchableOpacity>
     </KeyboardAvoidingView>
   );
 };
@@ -456,6 +468,11 @@ const styles = StyleSheet.create({
   searchInput: {
     flex: 1,
     marginLeft: 10,
+  },
+  PrimaryLabel: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#fff",
   },
 });
 

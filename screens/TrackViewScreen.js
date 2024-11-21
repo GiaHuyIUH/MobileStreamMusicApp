@@ -24,9 +24,13 @@ import {
   setCurrentSongIndex,
   setRadioUrl,
   setPlayerData,
+  setIsRepeat,
+  setIsRandom,
 } from "../store/playerSlice";
 import AudioService from "../services/AudioService"; // Import AudioService
 import { useNavigation } from "@react-navigation/core";
+import TrackOptionsBottomSheet from "./TrackOptionsBottomSheet";
+import TrackOptionBottomSheet from "./TrackOptionsBottomSheet";
 
 const TrackViewScreen = () => {
   const navigation = useNavigation();
@@ -45,7 +49,9 @@ const TrackViewScreen = () => {
   const dispatch = useDispatch();
   const lyrics = useLyric(singleSong.encodeId);
   const [album, setAlbum] = useState(null);
+  const [isSheetVisible, setIsSheetVisible] = useState(true);
 
+  const bottomSheetRef = useRef(null);
   // State để hiển thị modal
   const [modalVisible, setModalVisible] = useState(false);
   const [intervalId, setIntervalId] = useState(null); // To store interval ID
@@ -88,12 +94,6 @@ const TrackViewScreen = () => {
     </TouchableOpacity>
   );
 
-  // Hàm mở modal
-  const openModal = () => setModalVisible(true);
-
-  // Hàm đóng modal
-  const closeModal = () => setModalVisible(false);
-
   useEffect(() => {
     async function fetchAndPlaySong() {
       if (
@@ -134,28 +134,81 @@ const TrackViewScreen = () => {
   }, [singleSong]);
 
   // Start/Stop updating the progress when play/pause
+  // useEffect(() => {
+  //   if (isPlaying) {
+  //     const id = setInterval(async () => {
+  //       const status = await AudioService.sound.getStatusAsync();
+  //       if (status.isLoaded) {
+  //         const position = status.positionMillis;
+  //         dispatch(setCurrentProgress(position / status.durationMillis));
+
+  //         // Check if the song has ended
+  //         if (status.didJustFinish) {
+  //           if (isRepeat) {
+  //             handleRepeat();
+  //           } else if (isRandom) {
+  //             handleRandomSong();
+  //           } else {
+  //             if (currentSongIndex === playlist.length - 1) {
+  //               dispatch(setCurrentProgress(0));
+  //               dispatch(setCurrentSongIndex(0));
+  //               dispatch(setPlayerData(playlist[0]));
+  //               dispatch(setIsPlaying(false));
+  //             } else {
+  //               handleNext();
+  //             }
+  //           }
+  //         }
+  //       }
+  //     }, 1000); // Update every second
+  //     setIntervalId(id); // Save the interval ID for cleanup
+  //   } else {
+  //     if (intervalId) {
+  //       clearInterval(intervalId); // Stop updating progress if paused
+  //     }
+  //   }
+
+  //   return () => {
+  //     if (intervalId) {
+  //       clearInterval(intervalId);
+  //     }
+  //   };
+  // }, [isPlaying, duration]);
+
   useEffect(() => {
-    if (isPlaying) {
-      const id = setInterval(async () => {
-        const status = await AudioService.sound.getStatusAsync();
+    if (AudioService.sound) {
+      AudioService.setOnPlaybackStatusUpdate((status) => {
         if (status.isLoaded) {
           const position = status.positionMillis;
-          dispatch(setCurrentProgress(position / status.durationMillis));
+          const duration = status.durationMillis;
+
+          dispatch(setCurrentProgress(position / duration));
+
+          // Kiểm tra nếu bài hát kết thúc
+          if (status.didJustFinish) {
+            if (isRepeat) {
+              handleRepeat();
+            } else if (isRandom) {
+              handleRandomSong();
+            } else {
+              if (currentSongIndex === playlist.length - 1) {
+                dispatch(setCurrentProgress(0));
+                dispatch(setCurrentSongIndex(0));
+                dispatch(setPlayerData(playlist[0]));
+                dispatch(setIsPlaying(false));
+              } else {
+                handleNext();
+              }
+            }
+          }
         }
-      }, 1000); // Update every second
-      setIntervalId(id); // Save the interval ID for cleanup
-    } else {
-      if (intervalId) {
-        clearInterval(intervalId); // Stop updating progress if paused
-      }
+      });
     }
 
     return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
+      AudioService.setOnPlaybackStatusUpdate(null);
     };
-  }, [isPlaying, duration]);
+  }, [AudioService.sound, isRepeat, isRandom, currentSongIndex, playlist]);
 
   useEffect(() => {
     const index = lyrics.findIndex(
@@ -173,8 +226,16 @@ const TrackViewScreen = () => {
 
   // Hàm xử lý khi kéo thanh tiến trình
   const handleSliderChange = async (value) => {
-    const seekPosition = value * duration;
-    await AudioService.seek(seekPosition); // Tua bài hát qua AudioService
+    if (!AudioService.isLoaded) {
+      console.warn("Audio not loaded!");
+      return;
+    }
+    const seekPosition = value * duration; // Calculate the position in milliseconds
+    try {
+      await AudioService.seek(seekPosition); // Call the seek method
+    } catch (error) {
+      console.error("Error seeking audio:", error);
+    }
   };
 
   const formatTime = (millis) => {
@@ -241,6 +302,7 @@ const TrackViewScreen = () => {
     }
   }, [currentSongIndex, playlist]);
   const handleRepeat = useCallback(() => {
+    AudioService.playFromStart();
     dispatch(setCurrentProgress(0));
   }, []);
 
@@ -252,6 +314,7 @@ const TrackViewScreen = () => {
     dispatch(setRadioUrl(""));
     dispatch(setCurrentProgress(0));
     dispatch(setIsPlaying(true));
+    AudioService.playFromStart();
   }, [playlist]);
 
   return (
@@ -266,7 +329,7 @@ const TrackViewScreen = () => {
           <Ionicons name="chevron-down" size={24} color="#fff" />
         </TouchableOpacity>
         <Text style={styles.albumTitle}>{album?.album?.title || "Album"}</Text>
-        <TouchableOpacity onPress={() => openModal()}>
+        <TouchableOpacity onPress={() => bottomSheetRef.current.open()}>
           <Ionicons name="ellipsis-horizontal" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -301,8 +364,12 @@ const TrackViewScreen = () => {
       </View>
 
       <View style={styles.controlsContainer}>
-        <TouchableOpacity onPress={() => console.log("Shuffle")}>
-          <MaterialCommunityIcons name="shuffle" size={24} color="#fff" />
+        <TouchableOpacity onPress={() => dispatch(setIsRandom(!isRandom))}>
+          <MaterialCommunityIcons
+            name="shuffle"
+            size={24}
+            color={isRandom === true ? "#1DB954" : "#fff"}
+          />
         </TouchableOpacity>
         <TouchableOpacity onPress={handlePrev}>
           <Ionicons name="play-skip-back-outline" size={24} color="#fff" />
@@ -317,8 +384,12 @@ const TrackViewScreen = () => {
         <TouchableOpacity onPress={handleNext}>
           <Ionicons name="play-skip-forward-outline" size={24} color="#fff" />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleRepeat}>
-          <MaterialCommunityIcons name="repeat" size={24} color="#1DB954" />
+        <TouchableOpacity onPress={() => dispatch(setIsRepeat(!isRepeat))}>
+          <MaterialCommunityIcons
+            name="repeat"
+            size={24}
+            color={isRepeat === true ? "#1DB954" : "#fff"}
+          />
         </TouchableOpacity>
       </View>
 
@@ -353,41 +424,7 @@ const TrackViewScreen = () => {
         )}
       </View>
 
-      <Modal
-        animationType="fade"
-        transparent={true}
-        visible={modalVisible}
-        onRequestClose={closeModal}
-      >
-        <View style={styles.modalOverlay}>
-          <View style={styles.modalContainer}>
-            <View style={styles.header1}>
-              <Image
-                source={{ uri: trackData.cover }}
-                style={styles.albumCover1}
-              />
-              <Text style={styles.albumTitle1}>{trackData.title}</Text>
-              <Text style={styles.artistName}>{trackData.artist}</Text>
-            </View>
-
-            {/* FlatList to render control items */}
-            <FlatList
-              data={controls}
-              renderItem={renderControlItem}
-              keyExtractor={(item) => item.id}
-              contentContainerStyle={styles.listContainer}
-            />
-
-            {/* Close Button */}
-            <TouchableOpacity
-              style={styles.closeButton}
-              onPress={() => closeModal()}
-            >
-              <Text style={styles.closeButtonText}>Close</Text>
-            </TouchableOpacity>
-          </View>
-        </View>
-      </Modal>
+      <TrackOptionBottomSheet ref={bottomSheetRef} trackData={trackData} />
     </View>
   );
 };
@@ -475,8 +512,10 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     alignItems: "center",
     backgroundColor: "rgba(0, 0, 0, 0.5)",
+    zIndex: 10,
   },
   modalContainer: {
+    flex: 1,
     width: "100%",
     backgroundColor: "#121212",
     borderRadius: 10,
@@ -524,11 +563,7 @@ const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderBottomColor: "#282828",
   },
-  controlText: {
-    fontSize: 16,
-    color: "#fff",
-    marginLeft: 15,
-  },
+
   closeButton: {
     alignItems: "center",
     paddingVertical: 15,

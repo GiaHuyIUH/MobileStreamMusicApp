@@ -1,27 +1,31 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
   TextInput,
   StyleSheet,
   TouchableOpacity,
+  ActivityIndicator,
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../components/firebase";
+import { useAuth } from "../context/auth-context";
 
 const LogInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("tranhuy12072003@gmail.com");
+  const [password, setPassword] = useState("Anhbakhia3@");
   const [showPassword, setShowPassword] = useState(false);
 
-  const handleLogin = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email, password);
-      navigation.replace("Main");
-    } catch (error) {
-      console.log(error);
+  const { userInfo } = useAuth();
+  useEffect(() => {
+    if (userInfo) {
+      navigation.navigate("MainFlow");
     }
+  }, [userInfo]);
+
+  const handleLogin = async () => {
+    await signInWithEmailAndPassword(auth, email, password);
   };
 
   return (

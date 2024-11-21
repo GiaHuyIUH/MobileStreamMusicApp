@@ -2,8 +2,8 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import React from "react";
 import Toggle from "../components/Toggle";
 import { useAuth } from "../context/auth-context";
-import { signOut } from "firebase/auth";
 import { auth } from "../components/firebase";
+import { TouchableOpacity } from "react-native";
 
 export default function UserSettingScreen({ navigation }) {
   const { userInfo, setUserInfo } = useAuth();
@@ -54,7 +54,9 @@ export default function UserSettingScreen({ navigation }) {
         <Text style={{ color: "white", fontSize: 20, fontWeight: 700 }}>
           Account
         </Text>
-        <Pressable onPress={() => navigation.navigate("ChangeDisplayName")}>
+        <TouchableOpacity
+          onPress={() => navigation.navigate("ChangeDisplayName")}
+        >
           <Text
             style={{
               color: "white",
@@ -73,8 +75,8 @@ export default function UserSettingScreen({ navigation }) {
           >
             {userInfo?.userName || "undefined"}
           </Text>
-        </Pressable>
-        <Pressable onPress={() => navigation.navigate("ChangePassword")}>
+        </TouchableOpacity>
+        <TouchableOpacity onPress={() => navigation.navigate("ChangePassword")}>
           <Text
             style={{
               color: "white",
@@ -93,7 +95,7 @@ export default function UserSettingScreen({ navigation }) {
           >
             {userInfo?.email || "undefined"}
           </Text>
-        </Pressable>
+        </TouchableOpacity>
         <Text
           style={{
             color: "white",

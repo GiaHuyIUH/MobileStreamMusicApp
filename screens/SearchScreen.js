@@ -8,9 +8,10 @@ import {
 } from "react-native";
 import React from "react";
 import { zingmp3Api } from "../apis/constants";
-import Header from "./Header";
+import Header from "../modules/Search/Header";
 import { useDispatch } from "react-redux";
 import { setCurrentProgress, setIsPlaying } from "../store/playerSlice";
+import { TouchableOpacity } from "react-native";
 
 const data = [
   {
@@ -102,16 +103,16 @@ const data = [
 export default function SearchScreen({ navigation }) {
   const dispatch = useDispatch();
   return (
-    <ScrollView style={styles.container}>
+    <View style={styles.container}>
       <View style={styles.stickyContainer}>
         <Header title={"Search"} navigation={navigation} />
-        <Pressable
+        <TouchableOpacity
           onPress={() => navigation.navigate("SearchView")}
           style={styles.searchInput}
         >
           <Text>{/* SVG icon */}</Text>
           <Text style={styles.searchText}>What do you want to listen to?</Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
       <Text style={styles.browseText}>Browse all</Text>
       <View style={styles.contentContainer}>
@@ -121,7 +122,7 @@ export default function SearchScreen({ navigation }) {
           data={data}
           keyExtractor={(item) => item.id}
           renderItem={({ item }) => (
-            <Pressable
+            <TouchableOpacity
               onPress={() => {
                 dispatch(setIsPlaying(false));
                 dispatch(setCurrentProgress(0));
@@ -136,11 +137,11 @@ export default function SearchScreen({ navigation }) {
               >
                 {item.title}
               </Text>
-            </Pressable>
+            </TouchableOpacity>
           )}
         />
       </View>
-    </ScrollView>
+    </View>
   );
 }
 

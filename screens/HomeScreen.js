@@ -16,6 +16,18 @@ import { auth, db } from "../components/firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { getHomePage } from "../apis/home";
 import Header from "../modules/Search/Header";
+import { useDispatch } from "react-redux";
+import {
+  setAudioUrl,
+  setCurrentProgress,
+  setCurrentSongIndex,
+  setIsPlaying,
+  setPlayerData,
+  setPlaylist,
+  setRadioUrl,
+  setShowPlayer,
+  setShowSubPlayer,
+} from "../store/playerSlice";
 
 const HomeScreen = ({ navigation }) => {
   const [user, setUser] = useState(null);
@@ -24,6 +36,7 @@ const HomeScreen = ({ navigation }) => {
   const flatListRef = useRef(null);
   const bannerListRef = useRef(null);
   const [currentIndex, setCurrentIndex] = useState(0);
+  const dispatch = useDispatch();
 
   useEffect(() => {
     const fetchUserData = async (currentUser) => {
@@ -55,7 +68,8 @@ const HomeScreen = ({ navigation }) => {
           if (
             sectionType === "new-release" ||
             sectionType === "playlist" ||
-            sectionType === "banner"
+            sectionType === "banner" ||
+            sectionType === "newReleaseChart"
           ) {
             acc.push({ sectionType, title, ...rest });
           }
@@ -109,15 +123,6 @@ const HomeScreen = ({ navigation }) => {
     }
   }, [currentIndex, homeData]);
 
-  const handleLogout = async () => {
-    try {
-      await auth.signOut();
-      navigation.navigate("Start");
-    } catch (error) {
-      console.error("Error during logout:", error);
-    }
-  };
-
   const getCurrentTime = () => {
     const hour = new Date().toLocaleTimeString("vi-VN", {
       hour: "2-digit",
@@ -135,8 +140,17 @@ const HomeScreen = ({ navigation }) => {
     return "";
   };
 
+  // get player url
+
   const BannerItem = ({ item }) => (
-    <TouchableOpacity style={styles.bannerContainer}>
+    <TouchableOpacity
+      style={styles.bannerContainer}
+      onPress={() => {
+        navigation.navigate("PlayList", {
+          id: item.encodeId,
+        });
+      }}
+    >
       <Image source={{ uri: item.banner }} style={styles.bannerImage} />
     </TouchableOpacity>
   );
@@ -177,13 +191,19 @@ const HomeScreen = ({ navigation }) => {
               <TouchableOpacity
                 style={styles.itemContainer}
                 onPress={() => {
-                  if (item?.link.includes("/bai-hat")) {
-                    navigation.navigate("TrackViewScreen", {
-                      song: item,
-                    });
-                  } else if (item?.link.includes("/playlist")) {
-                    navigation.navigate("PlaylistViewScreen", {
-                      playlist: item.encodeId,
+                  if (item.duration > 0) {
+                    dispatch(setCurrentProgress(0));
+                    dispatch(setPlayerData(item));
+                    dispatch(setAudioUrl(""));
+                    dispatch(setRadioUrl(""));
+                    dispatch(setShowSubPlayer(false));
+                    dispatch(setShowPlayer(true));
+                    dispatch(setIsPlaying(true));
+                  } else {
+                    dispatch(setIsPlaying(false));
+                    dispatch(setCurrentProgress(0));
+                    navigation.navigate("PlayList", {
+                      id: item.encodeId,
                     });
                   }
                 }}
@@ -196,6 +216,19 @@ const HomeScreen = ({ navigation }) => {
                 />
                 <Text numberOfLines={2} style={styles.itemTitle}>
                   {item.title}
+                </Text>
+                <Text
+                  style={{
+                    color: "green",
+                    fontWeight: "600",
+                    textAlign: "center",
+                  }}
+                >
+                  {item.duration
+                    ? item?.streamingStatus === 1
+                      ? ""
+                      : "VIP"
+                    : ""}
                 </Text>
               </TouchableOpacity>
             )}
@@ -239,6 +272,7 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: Platform.OS === "android" ? StatusBar.currentHeight : 0,
     padding: 15,
+    paddingBottom: 20,
   },
   bannerContainer: {
     width: Dimensions.get("window").width * 0.8,

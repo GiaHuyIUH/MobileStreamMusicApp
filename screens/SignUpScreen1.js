@@ -26,8 +26,10 @@ const SignUpScreen1 = ({ navigation }) => {
 
       if (!querySnapshot.empty) {
         setEmailMessage("This email is already registered.");
+        return false;
       } else {
         setEmailMessage("You'll need to confirm this email later.");
+        return true;
       }
     } catch (error) {
       console.log(error);
@@ -36,7 +38,8 @@ const SignUpScreen1 = ({ navigation }) => {
 
   const handleNext = async () => {
     const emailExists = await checkEmailExistence();
-    if (!emailExists) {
+    const emailAndPasswordValid = checkPassword();
+    if (emailExists && emailAndPasswordValid) {
       navigation.navigate("SignUpScreen2", {
         email: email,
         password: password,
@@ -44,16 +47,12 @@ const SignUpScreen1 = ({ navigation }) => {
     }
   };
 
-  const checkEmailAndPassword = () => {
-    const regexEmail = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{3,}$/;
+  const checkPassword = () => {
     const regexPassword =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    if (!regexEmail.test(email)) {
-      setEmailMessage("Invalid email address.");
-      return false;
-    } else if (regexEmail.test(email) && regexPassword.test(password)) {
-      setEmailMessage("You'll need to confirm this email later.");
+    if (regexPassword.test(password)) {
       setPasswordMessage("Password is valid.");
+      return true;
     } else if (!regexPassword.test(password)) {
       setPasswordMessage(
         "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters."
