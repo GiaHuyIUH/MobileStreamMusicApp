@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -7,10 +7,28 @@ import {
   Image,
   StyleSheet,
   TouchableOpacity,
+  ScrollView,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-
+import { useAuth } from "../context/auth-context";
+import { useDispatch } from "react-redux";
+import Header from "../modules/Search/Header";
+import {
+  setCurrentProgress,
+  setIsPlaying,
+  setShowSubPlayer,
+} from "../store/playerSlice";
+import removeArtistFromUserLibrary from "../utils/removeArtistFromUserLibrary";
 const LibraryScreen = ({ navigation }) => {
+  const { userInfo, setUserInfo } = useAuth();
+  const [selectedArtists, setSelectedArtists] = useState(
+    userInfo?.Artist || []
+  );
+  const [playlist, setPlaylist] = useState(userInfo?.Playlist || []);
+  const [myPlaylist, setMyPlaylist] = useState(userInfo?.MyPlaylist);
+  const dispatch = useDispatch();
+  console.log("userInfo", userInfo);
+
   const sections = [
     {
       id: "1",
@@ -28,42 +46,39 @@ const LibraryScreen = ({ navigation }) => {
       icon: "notifications",
       color: "#A020F0",
     },
-    {
-      id: "3",
-      title: "Lolo Zouaï",
-      type: "Artist",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      id: "4",
-      title: "Lana Del Rey",
-      type: "Artist",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      id: "5",
-      title: "Front Left",
-      type: "Playlist - Spotify",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      id: "6",
-      title: "Marvin Gaye",
-      type: "Artist",
-      image: "https://via.placeholder.com/50",
-    },
-    {
-      id: "7",
-      title: "Les",
-      type: "Song - Childish Gambino",
-      image: "https://via.placeholder.com/50",
-    },
   ];
+
+  function SearchOptionItem({ title, onPress, isActive = false }) {
+    return (
+      <TouchableOpacity
+        onPress={onPress}
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          width: 100,
+          height: 40,
+          borderRadius: 9999,
+          backgroundColor: isActive ? "#1fdf64" : "#272727",
+        }}
+      >
+        <Text
+          style={{
+            fontSize: 14,
+            fontWeight: 400,
+            color: isActive ? "black" : "white",
+          }}
+        >
+          {title}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
 
   const renderLibraryItem = ({ item }) => (
     <TouchableOpacity
       style={styles.libraryItem}
-      onPress={() => navigation.navigate("Profile", { item })} // Navigate to ProfileScreen with item data
+      onPress={() => handleLibraryItemPress(item)} // Navigate to ProfileScreen with item data
     >
       <View style={styles.iconContainer}>
         {item.icon ? (
@@ -82,12 +97,33 @@ const LibraryScreen = ({ navigation }) => {
     </TouchableOpacity>
   );
 
+  const addMusic = () => {
+    navigation.navigate("ArtistListScreen", {
+      selectedArtists: selectedArtists,
+    });
+  };
+
+  const handleLibraryItemPress = (item) => {
+    if (item.type === "Artist") {
+      navigation.navigate("ArtistPage", { item });
+    } else if (item.title === "Liked Songs") {
+      dispatch(setIsPlaying(false));
+      dispatch(setCurrentProgress(0));
+      navigation.navigate("PlayList", {
+        type: "liked",
+      });
+    }
+  };
+
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Text style={styles.headerTitle}>Your Library</Text>
-        <TouchableOpacity>
+        <Header title="Your Library" />
+        {/* <Text style={styles.headerTitle}>Your Library</Text> */}
+        <TouchableOpacity
+          onPress={() => navigation.navigate("CreatePlaylistScreen")}
+        >
           <Ionicons name="add" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -103,18 +139,67 @@ const LibraryScreen = ({ navigation }) => {
         <TouchableOpacity style={styles.filterButton}>
           <Text style={styles.filterText}>Albums</Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterText}>Podcasts & Shows</Text>
-        </TouchableOpacity>
       </View>
 
-      {/* Library Items List */}
-      <FlatList
-        data={sections}
-        renderItem={renderLibraryItem}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.libraryList}
-      />
+      {/* Combined Scrollable List */}
+      <ScrollView contentContainerStyle={styles.libraryList}>
+        <FlatList
+          data={sections}
+          renderItem={renderLibraryItem}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+        />
+        <FlatList
+          data={selectedArtists}
+          ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+          renderItem={({ item }) => (
+            <TouchableOpacity
+              style={styles.libraryItem}
+              onPress={() => navigateToArtistPage(item)}
+            >
+              <Image
+                source={{ uri: item.thumbnail }}
+                style={styles.musicItemImage}
+              />
+              <View style={styles.itemTextContainer}>
+                <Text style={styles.libraryTitle}>{item.name}</Text>
+                <Text style={styles.librarySubtitle}>Artist</Text>
+              </View>
+
+              <TouchableOpacity
+                onPress={() => {
+                  const newSelectedArtists = selectedArtists.filter(
+                    (artist) => {
+                      return artist.artistId !== item.artistId;
+                    }
+                  );
+                  setSelectedArtists(newSelectedArtists);
+                  removeArtistFromUserLibrary(
+                    item.artistId,
+                    userInfo,
+                    setUserInfo
+                  );
+                }}
+              >
+                <Ionicons name="trash" size={24} color="#fff" />
+              </TouchableOpacity>
+            </TouchableOpacity>
+          )}
+          keyExtractor={(item) => item.id}
+          scrollEnabled={false}
+        />
+      </ScrollView>
+
+      <View style={styles.buttonsContainer}>
+        <View style={styles.buttonRow}>
+          <TouchableOpacity style={styles.addButton} onPress={addMusic}>
+            <View style={styles.musicButtonCircle}>
+              <Text style={{ fontSize: 36, color: "#fff" }}>+</Text>
+            </View>
+            <Text style={styles.addButtonLabel}>Add Artist</Text>
+          </TouchableOpacity>
+        </View>
+      </View>
     </SafeAreaView>
   );
 };
@@ -123,6 +208,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: "#121212",
+    paddingBottom: 100,
   },
   header: {
     flexDirection: "row",
@@ -190,6 +276,40 @@ const styles = StyleSheet.create({
   librarySubtitle: {
     color: "#B0B0B0",
     fontSize: 14,
+  },
+  buttonsContainer: {
+    paddingVertical: 10,
+    paddingHorizontal: 10,
+    flexDirection: "column",
+  },
+  addButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  musicButtonCircle: {
+    width: 50,
+    height: 50,
+    borderRadius: 33,
+    backgroundColor: "#302C2C",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 8,
+  },
+  addButtonLabel: {
+    color: "#fff",
+    fontSize: 14,
+    marginLeft: 10,
+    fontWeight: "bold",
+  },
+  musicItemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 33,
+  },
+  itemTextContainer: {
+    marginLeft: 8,
+    minWidth: 280,
   },
 });
 
