@@ -12,6 +12,8 @@ import Header from "../modules/Search/Header";
 import { useDispatch } from "react-redux";
 import { setCurrentProgress, setIsPlaying } from "../store/playerSlice";
 import { TouchableOpacity } from "react-native";
+import IonIcons from "@expo/vector-icons/Ionicons";
+import GenreCard from "../modules/Search/GenreCard";
 
 const data = [
   {
@@ -100,48 +102,90 @@ const data = [
   },
 ];
 
+const genres = [
+  {
+    id: "1",
+    name: "#V-pop",
+    video:
+      "https://video-previews.elements.envatousercontent.com/f205a671-b632-4717-a7c5-2ccbae5b7e71/watermarked_preview/watermarked_preview.mp4",
+    poster:
+      "https://photo-resize-zmp3.zmdcdn.me/w600_r300x169_jpeg/thumb_video/8/0/1/c/801c0a9f296fd140a40f94ba3eae5e35.jpg",
+  },
+  {
+    id: "2",
+    name: "#Love Song",
+    video:
+      "https://video-previews.elements.envatousercontent.com/fb699b79-8287-4a99-9b78-ee74dd1a4699/watermarked_preview/watermarked_preview.mp4",
+
+    poster:
+      "https://photo-resize-zmp3.zmdcdn.me/w600_r300x169_jpeg/thumb_video/8/0/1/c/801c0a9f296fd140a40f94ba3eae5e35.jpg",
+  },
+  {
+    id: "3",
+    name: "#Hip-Hop",
+    video:
+      "https://video-previews.elements.envatousercontent.com/h264-video-previews/f09f4f6e-f443-41a0-baf9-925dbe75813c/21965034.mp4",
+    poster:
+      "https://photo-resize-zmp3.zmdcdn.me/w600_r300x169_jpeg/thumb_video/8/0/1/c/801c0a9f296fd140a40f94ba3eae5e35.jpg",
+  },
+];
+
 export default function SearchScreen({ navigation }) {
   const dispatch = useDispatch();
   return (
-    <View style={styles.container}>
-      <View style={styles.stickyContainer}>
-        <Header title={"Search"} navigation={navigation} />
-        <TouchableOpacity
-          onPress={() => navigation.navigate("SearchView")}
-          style={styles.searchInput}
-        >
-          <Text>{/* SVG icon */}</Text>
-          <Text style={styles.searchText}>What do you want to listen to?</Text>
-        </TouchableOpacity>
-      </View>
-      <Text style={styles.browseText}>Browse all</Text>
-      <View style={styles.contentContainer}>
-        <FlatList
-          columnWrapperStyle={styles.columnWrapper}
-          numColumns={2}
-          data={data}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => (
+    <FlatList
+      style={styles.container}
+      data={data}
+      keyExtractor={(item) => item.id}
+      numColumns={2}
+      columnWrapperStyle={styles.columnWrapper}
+      ListHeaderComponent={
+        <>
+          <View style={styles.stickyContainer}>
+            <Header title={"Search"} navigation={navigation} />
             <TouchableOpacity
-              onPress={() => {
-                dispatch(setIsPlaying(false));
-                dispatch(setCurrentProgress(0));
-                navigation.navigate("CategoryDetail", { item });
-              }}
-              style={[styles.item, { backgroundColor: item.color }]}
+              onPress={() => navigation.navigate("SearchView")}
+              style={styles.searchInput}
             >
-              <Text
-                ellipsizeMode="tail"
-                numberOfLines={1}
-                style={styles.itemText}
-              >
-                {item.title}
+              <IonIcons name="search" size={20} color="#ccc" />
+              <Text style={styles.searchText}>
+                What do you want to listen to?
               </Text>
             </TouchableOpacity>
-          )}
-        />
-      </View>
-    </View>
+          </View>
+          <Text style={styles.browseText}>Explore your genres</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              height: 200,
+              gap: 10,
+              marginBottom: 15,
+            }}
+          >
+            <GenreCard genre={genres[0]} />
+            <GenreCard genre={genres[1]} />
+            <GenreCard genre={genres[2]} />
+          </View>
+          <Text style={styles.browseText}>Browse All</Text>
+        </>
+      }
+      renderItem={({ item }) => (
+        <TouchableOpacity
+          onPress={() => {
+            dispatch(setIsPlaying(false));
+            dispatch(setCurrentProgress(0));
+            navigation.navigate("CategoryDetail", { item });
+          }}
+          style={[styles.item, { backgroundColor: item.color }]}
+        >
+          <Text ellipsizeMode="tail" numberOfLines={1} style={styles.itemText}>
+            {item.title}
+          </Text>
+        </TouchableOpacity>
+      )}
+      contentContainerStyle={styles.contentContainer}
+      ListFooterComponent={<View style={{ height: 100 }}></View>}
+    />
   );
 }
 
@@ -181,7 +225,6 @@ const styles = StyleSheet.create({
     fontWeight: "700",
     marginBottom: 35,
     color: "white",
-    textTransform: "uppercase",
   },
   contentContainer: {
     marginBottom: 80,
