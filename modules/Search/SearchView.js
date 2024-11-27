@@ -1,4 +1,4 @@
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { Pressable, ScrollView, StyleSheet, Text, View } from "react-native";
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { zingmp3Api } from "../../apis/constants";
@@ -108,141 +108,149 @@ export default function SearchView({ navigation }) {
           >
             {activeOption === "all" && (
               <>
-                <SongItem
-                  data={data.top}
-                  onPress={() => {
-                    dispatch(setCurrentSongIndex(0));
-                    dispatch(setCurrentProgress(0));
-                    dispatch(setPlaylist([]));
-                    dispatch(setPlayerData(data.top));
-                    dispatch(setAudioUrl(""));
-                    dispatch(setRadioUrl(""));
-                    dispatch(setShowPlayer(true));
-                    dispatch(setIsPlaying(true));
-                  }}
-                ></SongItem>
-                {data?.artists?.slice(0, 10).map((item, index) => {
-                  return (
-                    <ArtistItem
-                      data={item}
-                      key={index}
-                      onPress={() => {
-                        dispatch(setIsPlaying(false));
-                        dispatch(setCurrentProgress(0));
-                        navigation.navigate("Artist", {
-                          id: item.playlistId,
-                        });
-                      }}
-                    />
-                  );
-                })}
-                {data?.songs?.slice(0, 10).map((item, index) => {
-                  return (
-                    <SongItem
-                      data={item}
-                      key={index}
-                      onPress={() => {
-                        dispatch(setCurrentSongIndex(0));
-                        dispatch(setCurrentProgress(0));
-                        dispatch(setPlaylist([]));
-                        dispatch(setPlayerData(item));
-                        dispatch(setAudioUrl(""));
-                        dispatch(setRadioUrl(""));
-                        dispatch();
-                        setShowPlayer(true);
-                        dispatch(setIsPlaying(true));
-                      }}
-                    />
-                  );
-                })}
-                {data?.playlists?.slice(0, 10).map((item, index) => {
-                  return (
-                    <PlaylistItem
-                      data={item}
-                      key={index}
-                      onPress={() => {
-                        dispatch(setIsPlaying(false));
-                        dispatch(setCurrentProgress(0));
-                        navigation.navigate("PlayList", {
-                          id: item.encodeId,
-                        });
-                      }}
-                    />
-                  );
-                })}
+                <ScrollView>
+                  <SongItem
+                    data={data.top}
+                    onPress={() => {
+                      dispatch(setCurrentSongIndex(0));
+                      dispatch(setCurrentProgress(0));
+                      dispatch(setPlaylist([]));
+                      dispatch(setPlayerData(data.top));
+                      dispatch(setAudioUrl(""));
+                      dispatch(setRadioUrl(""));
+                      dispatch(setShowPlayer(true));
+                      dispatch(setIsPlaying(true));
+                    }}
+                  ></SongItem>
+                  {data?.artists?.slice(0, 10).map((item, index) => {
+                    return (
+                      <ArtistItem
+                        data={item}
+                        key={index}
+                        onPress={() => {
+                          dispatch(setIsPlaying(false));
+                          dispatch(setCurrentProgress(0));
+                          navigation.navigate("Artist", {
+                            id: item.playlistId,
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                  {data?.songs?.slice(0, 10).map((item, index) => {
+                    return (
+                      <SongItem
+                        data={item}
+                        key={index}
+                        onPress={() => {
+                          dispatch(setCurrentSongIndex(0));
+                          dispatch(setCurrentProgress(0));
+                          dispatch(setPlaylist([]));
+                          dispatch(setPlayerData(item));
+                          dispatch(setAudioUrl(""));
+                          dispatch(setRadioUrl(""));
+                          dispatch();
+                          setShowPlayer(true);
+                          dispatch(setIsPlaying(true));
+                        }}
+                      />
+                    );
+                  })}
+                  {data?.playlists?.slice(0, 10).map((item, index) => {
+                    return (
+                      <PlaylistItem
+                        data={item}
+                        key={index}
+                        onPress={() => {
+                          dispatch(setIsPlaying(false));
+                          dispatch(setCurrentProgress(0));
+                          navigation.navigate("PlayList", {
+                            id: item.encodeId,
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                </ScrollView>
               </>
             )}
             {activeOption === "Songs" && (
               <>
-                <SongItem
-                  data={data.top}
-                  onPress={() => {
-                    dispatch(setCurrentSongIndex(0));
-                    dispatch(setCurrentProgress(0));
-                    dispatch(setPlaylist([]));
-                    dispatch(setPlayerData(data.top));
-                    dispatch(setAudioUrl(""));
-                    dispatch(setRadioUrl(""));
-                    dispatch(setShowPlayer(true));
-                    dispatch(setIsPlaying(true));
-                  }}
-                ></SongItem>
-                {data?.songs?.slice(0, 20).map((item, index) => {
-                  return (
-                    <SongItem
-                      data={item}
-                      key={index}
-                      onPress={() => {
-                        dispatch(setCurrentSongIndex(0));
-                        dispatch(setCurrentProgress(0));
-                        dispatch(setPlaylist([]));
-                        dispatch(setPlayerData(item));
-                        dispatch(setAudioUrl(""));
-                        dispatch(setRadioUrl(""));
-                        dispatch(setShowPlayer(true));
-                        dispatch(setIsPlaying(true));
-                      }}
-                    />
-                  );
-                })}
+                <ScrollView>
+                  <SongItem
+                    data={data.top}
+                    onPress={() => {
+                      dispatch(setCurrentSongIndex(0));
+                      dispatch(setCurrentProgress(0));
+                      dispatch(setPlaylist([]));
+                      dispatch(setPlayerData(data.top));
+                      dispatch(setAudioUrl(""));
+                      dispatch(setRadioUrl(""));
+                      dispatch(setShowPlayer(true));
+                      dispatch(setIsPlaying(true));
+                    }}
+                  ></SongItem>
+                  {data?.songs?.slice(0, 20).map((item, index) => {
+                    return (
+                      <SongItem
+                        data={item}
+                        key={index}
+                        onPress={() => {
+                          dispatch(setCurrentSongIndex(0));
+                          dispatch(setCurrentProgress(0));
+                          dispatch(setPlaylist([]));
+                          dispatch(setPlayerData(item));
+                          dispatch(setAudioUrl(""));
+                          dispatch(setRadioUrl(""));
+                          dispatch(setShowPlayer(true));
+                          dispatch(setIsPlaying(true));
+                        }}
+                      />
+                    );
+                  })}
+                </ScrollView>
               </>
             )}
             {activeOption === "Artist" && (
               <>
-                {data?.artists?.slice(0, 20).map((item, index) => {
-                  return (
-                    <ArtistItem
-                      data={item}
-                      key={index}
-                      onPress={() => {
-                        dispatch(setIsPlaying(false));
-                        dispatch(setCurrentProgress(0));
-                        navigation.navigate("Artist", {
-                          id: item.playlistId,
-                        });
-                      }}
-                    />
-                  );
-                })}
+                <ScrollView>
+                  {data?.artists?.slice(0, 20).map((item, index) => {
+                    return (
+                      <ArtistItem
+                        data={item}
+                        key={index}
+                        onPress={() => {
+                          dispatch(setIsPlaying(false));
+                          dispatch(setCurrentProgress(0));
+                          navigation.navigate("Artist", {
+                            id: item.playlistId,
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                </ScrollView>
               </>
             )}
             {activeOption === "Playlist" && (
               <>
-                {data?.playlists?.slice(0, 20).map((item, index) => {
-                  return (
-                    <PlaylistItem
-                      data={item}
-                      key={index}
-                      onPress={() => {
-                        dispatch(setIsPlaying(false));
-                        dispatch(setCurrentProgress(0));
-                        navigation.navigate("PlayList", {
-                          id: item.encodeId,
-                        });
-                      }}
-                    />
-                  );
-                })}
+                <ScrollView>
+                  {data?.playlists?.slice(0, 20).map((item, index) => {
+                    return (
+                      <PlaylistItem
+                        data={item}
+                        key={index}
+                        onPress={() => {
+                          dispatch(setIsPlaying(false));
+                          dispatch(setCurrentProgress(0));
+                          navigation.navigate("PlayList", {
+                            id: item.encodeId,
+                          });
+                        }}
+                      />
+                    );
+                  })}
+                </ScrollView>
               </>
             )}
           </View>
