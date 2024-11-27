@@ -1,17 +1,15 @@
 import {
+  arrayRemove,
   collection,
   doc,
   getDoc,
   updateDoc,
-  arrayUnion,
 } from "firebase/firestore";
 import { auth, db } from "../components/firebase";
 import { ToastAndroid } from "react-native";
-export default async function addSongIntoUserLibrary(
+
+export default async function removeSongFromUserLibrary(
   songId,
-  name,
-  thumbnail,
-  artistsNames,
   userInfo,
   setUserInfo
 ) {
@@ -23,32 +21,29 @@ export default async function addSongIntoUserLibrary(
     // Get the current state of the user's document
     const userDoc = await getDoc(userRef);
 
-    // Create a song object
-    const song = { songId, name, thumbnail, artistsNames };
-
     // Check if the Songs array contains the song
-    if (
-      userDoc.exists() &&
-      userDoc.data().Songs?.some((s) => s.songId === songId)
-    ) {
-      ToastAndroid.show("Song already in library", ToastAndroid.SHORT);
+    const song = userDoc.data().Songs.find((s) => s.songId === songId);
+    if (!userDoc.exists() || !song) {
+      console.log("Song not found in library");
+      ToastAndroid.show("Song not found in library", ToastAndroid.SHORT);
       return;
     }
 
-    // Update the user's document by adding the song to the Songs array
+    // Update the user's document by removing the song from the Songs array
     await updateDoc(userRef, {
-      Songs: arrayUnion(song),
+      Songs: arrayRemove(song),
     });
 
     // Update userInfo
+    const newSongs = userInfo.Songs.filter((s) => s.songId !== songId);
     setUserInfo({
       ...userInfo,
-      Songs: [...(userInfo.Songs || []), song],
+      Songs: newSongs,
     });
-    ToastAndroid.show("Add song to library success", ToastAndroid.SHORT);
-    console.log("Song added to library");
+    console.log("Song removed from library");
+    ToastAndroid.show("Remove song from library success", ToastAndroid.SHORT);
   } catch (error) {
     console.log("error:", error);
-    ToastAndroid.show("Add song to library failed", ToastAndroid.SHORT);
+    ToastAndroid.show("Remove song from library failed", ToastAndroid.SHORT);
   }
 }
