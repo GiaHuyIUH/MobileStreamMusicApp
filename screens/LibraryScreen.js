@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   SafeAreaView,
   View,
@@ -19,61 +19,34 @@ import {
   setShowSubPlayer,
 } from "../store/playerSlice";
 import removeArtistFromUserLibrary from "../utils/removeArtistFromUserLibrary";
-const LibraryScreen = ({ navigation }) => {
+import removeMyPlayListFromUserLibrary from "../utils/removeMyPlayListFromUserLibrary";
+import removeMyPlaylistSongFromUserLibrary from "../utils/removeMyPlaylistSongFromUserLibrary";
+import removePlaylistFromUserLibrary from "../utils/removePlaylistfromUserLibrary";
+
+const LibraryScreen = ({ route, navigation }) => {
   const { userInfo, setUserInfo } = useAuth();
   const [selectedArtists, setSelectedArtists] = useState(
     userInfo?.Artist || []
   );
+
   const [playlist, setPlaylist] = useState(userInfo?.Playlist || []);
   const [myPlaylist, setMyPlaylist] = useState(userInfo?.MyPlaylist);
   const dispatch = useDispatch();
   console.log("userInfo", userInfo);
-
+  const [filterType, setFilterType] = useState("All");
   const sections = [
     {
       id: "1",
       title: "Liked Songs",
       type: "Playlist",
-      songs: "58 songs",
       icon: "heart",
       color: "#1DB954",
     },
-    {
-      id: "2",
-      title: "New Episodes",
-      type: "Playlist",
-      updated: "Updated 2 days ago",
-      icon: "notifications",
-      color: "#A020F0",
-    },
   ];
 
-  function SearchOptionItem({ title, onPress, isActive = false }) {
-    return (
-      <TouchableOpacity
-        onPress={onPress}
-        style={{
-          flex: 1,
-          alignItems: "center",
-          justifyContent: "center",
-          width: 100,
-          height: 40,
-          borderRadius: 9999,
-          backgroundColor: isActive ? "#1fdf64" : "#272727",
-        }}
-      >
-        <Text
-          style={{
-            fontSize: 14,
-            fontWeight: 400,
-            color: isActive ? "black" : "white",
-          }}
-        >
-          {title}
-        </Text>
-      </TouchableOpacity>
-    );
-  }
+  useEffect(() => {
+    setSelectedArtists(userInfo?.Artist || []);
+  }, [userInfo]);
 
   const renderLibraryItem = ({ item }) => (
     <TouchableOpacity
@@ -109,17 +82,22 @@ const LibraryScreen = ({ navigation }) => {
     } else if (item.title === "Liked Songs") {
       dispatch(setIsPlaying(false));
       dispatch(setCurrentProgress(0));
-      navigation.navigate("PlayList", {
+      navigation.navigate("LikedSongScreen", {
         type: "liked",
       });
     }
+  };
+
+  const navigateToArtistPage = (artist) => {
+    console.log(artist);
+    navigation.navigate("ArtistPage", { id: artist.playlistId });
   };
 
   return (
     <SafeAreaView style={styles.container}>
       {/* Header */}
       <View style={styles.header}>
-        <Header title="Your Library" />
+        <Header title="Your Library" navigation={navigation} />
         {/* <Text style={styles.headerTitle}>Your Library</Text> */}
         <TouchableOpacity
           onPress={() => navigation.navigate("CreatePlaylistScreen")}
@@ -130,65 +108,415 @@ const LibraryScreen = ({ navigation }) => {
 
       {/* Filter Buttons */}
       <View style={styles.filterContainer}>
-        <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterText}>Playlists</Text>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "All" && styles.activeFilterButton, // Highlight if active
+          ]}
+          onPress={() => setFilterType("All")}
+        >
+          <Text
+            style={[
+              styles.filterText,
+              filterType === "All" && styles.activeFilterText, // Highlight text if active
+            ]}
+          >
+            All
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterText}>Artists</Text>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "Playlist" && styles.activeFilterButton, // Highlight if active
+          ]}
+          onPress={() => setFilterType("Playlist")}
+        >
+          <Text
+            style={[
+              styles.filterText,
+              filterType === "Playlist" && styles.activeFilterText, // Highlight text if active
+            ]}
+          >
+            Playlists
+          </Text>
         </TouchableOpacity>
-        <TouchableOpacity style={styles.filterButton}>
-          <Text style={styles.filterText}>Albums</Text>
+        <TouchableOpacity
+          style={[
+            styles.filterButton,
+            filterType === "Artist" && styles.activeFilterButton, // Highlight if active
+          ]}
+          onPress={() => setFilterType("Artist")}
+        >
+          <Text
+            style={[
+              styles.filterText,
+              filterType === "Artist" && styles.activeFilterText, // Highlight text if active
+            ]}
+          >
+            Artists
+          </Text>
         </TouchableOpacity>
       </View>
-
       {/* Combined Scrollable List */}
       <ScrollView contentContainerStyle={styles.libraryList}>
-        <FlatList
-          data={sections}
-          renderItem={renderLibraryItem}
-          keyExtractor={(item) => item.id}
-          scrollEnabled={false}
-        />
-        <FlatList
-          data={selectedArtists}
-          ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
-          renderItem={({ item }) => (
-            <TouchableOpacity
-              style={styles.libraryItem}
-              onPress={() => navigateToArtistPage(item)}
-            >
-              <Image
-                source={{ uri: item.thumbnail }}
-                style={styles.musicItemImage}
-              />
-              <View style={styles.itemTextContainer}>
-                <Text style={styles.libraryTitle}>{item.name}</Text>
-                <Text style={styles.librarySubtitle}>Artist</Text>
-              </View>
+        {filterType === "All" && (
+          <>
+            <FlatList
+              data={sections}
+              renderItem={renderLibraryItem}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+            <FlatList
+              data={myPlaylist}
+              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+              renderItem={({ item }) => {
+                const playlistSong = userInfo?.MyPlaylistSongs?.find(
+                  (playlist) => playlist.playlistId === item.playlistId
+                );
+                const uri = playlistSong
+                  ? playlistSong.song.thumbnailM
+                  : item.thumbnail;
+                return (
+                  <TouchableOpacity
+                    style={styles.libraryItem}
+                    onPress={() => {
+                      dispatch(setIsPlaying(false));
+                      dispatch(setCurrentProgress(0));
+                      navigation.navigate("PlayList", {
+                        MyPlaylistId: item.playlistId,
+                      });
+                    }}
+                  >
+                    <Image
+                      source={{ uri: uri }}
+                      style={styles.playlistItemImage}
+                    />
+                    <View style={styles.itemTextContainer}>
+                      <Text
+                        style={styles.libraryTitle}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {item.name}
+                      </Text>
+                      <Text style={styles.librarySubtitle}>Playlist</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var songs = userInfo.MyPlaylistSongs.filter(
+                          (songPlaylist) =>
+                            item.playlistId === songPlaylist.playlistId
+                        );
 
-              <TouchableOpacity
-                onPress={() => {
-                  const newSelectedArtists = selectedArtists.filter(
-                    (artist) => {
-                      return artist.artistId !== item.artistId;
-                    }
-                  );
-                  setSelectedArtists(newSelectedArtists);
-                  removeArtistFromUserLibrary(
-                    item.artistId,
-                    userInfo,
-                    setUserInfo
-                  );
-                }}
-              >
-                <Ionicons name="trash" size={24} color="#fff" />
-              </TouchableOpacity>
-            </TouchableOpacity>
-          )}
-          keyExtractor={(item) => item.id}
-          scrollEnabled={false}
-        />
+                        removeMyPlayListFromUserLibrary(
+                          item.playlistId,
+                          userInfo,
+                          setUserInfo
+                        );
+                        songs.forEach((song) => {
+                          removeMyPlaylistSongFromUserLibrary(
+                            item.playlistId,
+                            song.song.encodeId,
+                            userInfo,
+                            setUserInfo,
+                            true
+                          );
+                        });
+
+                        var newMyPlaylist = myPlaylist.filter(
+                          (playlist) => playlist.playlistId !== item.playlistId
+                        );
+
+                        setMyPlaylist(newMyPlaylist);
+                      }}
+                    >
+                      <Ionicons
+                        name="remove-circle-outline"
+                        size={24}
+                        color="#fff"
+                      />
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                );
+              }}
+              keyExtractor={(item) => item.playlistId}
+              scrollEnabled={false}
+            />
+
+            <FlatList
+              data={playlist}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.libraryItem}
+                  onPress={() =>
+                    navigation.navigate("PlayList", {
+                      id: item.playlistId,
+                    })
+                  }
+                >
+                  <Image
+                    source={{ uri: item?.thumbnail }}
+                    style={styles.playlistItemImage}
+                  />
+                  <View style={styles.itemTextContainer}>
+                    <Text style={styles.libraryTitle}>{item?.name}</Text>
+                    <Text style={styles.librarySubtitle}>Playlist</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      const newPlaylist = playlist.filter((currentPlaylist) => {
+                        return currentPlaylist.playlistId !== item.playlistId;
+                      });
+                      setPlaylist(newPlaylist);
+                      removePlaylistFromUserLibrary(
+                        item.playlistId,
+                        userInfo,
+                        setUserInfo
+                      );
+                    }}
+                  >
+                    <Ionicons
+                      name="remove-circle-outline"
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item?.playlistId}
+              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+              scrollEnabled={false}
+            />
+            <FlatList
+              data={selectedArtists}
+              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.libraryItem}
+                  onPress={() => navigateToArtistPage(item)}
+                >
+                  <Image
+                    source={{ uri: item.thumbnail }}
+                    style={styles.musicItemImage}
+                  />
+                  <View style={styles.itemTextContainer}>
+                    <Text style={styles.libraryTitle}>{item.name}</Text>
+                    <Text style={styles.librarySubtitle}>Artist</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      const newSelectedArtists = selectedArtists.filter(
+                        (artist) => {
+                          return artist.artistId !== item.artistId;
+                        }
+                      );
+                      setSelectedArtists(newSelectedArtists);
+                      removeArtistFromUserLibrary(
+                        item.artistId,
+                        userInfo,
+                        setUserInfo
+                      );
+                    }}
+                  >
+                    <Ionicons
+                      name="remove-circle-outline"
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+          </>
+        )}
+
+        {filterType === "Playlist" && (
+          <>
+            <FlatList
+              data={sections}
+              renderItem={renderLibraryItem}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+            <FlatList
+              data={myPlaylist}
+              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+              renderItem={({ item }) => {
+                const playlistSong = userInfo?.MyPlaylistSongs?.find(
+                  (playlist) => playlist.playlistId === item.playlistId
+                );
+                const uri = playlistSong
+                  ? playlistSong.song.thumbnailM
+                  : item.thumbnail;
+                return (
+                  <TouchableOpacity
+                    style={styles.libraryItem}
+                    onPress={() => {
+                      dispatch(setIsPlaying(false));
+                      dispatch(setCurrentProgress(0));
+                      navigation.navigate("PlayList", {
+                        MyPlaylistId: item.playlistId,
+                      });
+                    }}
+                  >
+                    <Image
+                      source={{ uri: uri }}
+                      style={styles.playlistItemImage}
+                    />
+                    <View style={styles.itemTextContainer}>
+                      <Text
+                        style={styles.libraryTitle}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {item.name}
+                      </Text>
+                      <Text style={styles.librarySubtitle}>Playlist</Text>
+                    </View>
+                    <TouchableOpacity
+                      onPress={() => {
+                        var songs = userInfo.MyPlaylistSongs.filter(
+                          (songPlaylist) =>
+                            item.playlistId === songPlaylist.playlistId
+                        );
+
+                        removeMyPlayListFromUserLibrary(
+                          item.playlistId,
+                          userInfo,
+                          setUserInfo
+                        );
+                        songs.forEach((song) => {
+                          removeMyPlaylistSongFromUserLibrary(
+                            item.playlistId,
+                            song.song.encodeId,
+                            userInfo,
+                            setUserInfo,
+                            true
+                          );
+                        });
+
+                        var newMyPlaylist = myPlaylist.filter(
+                          (playlist) => playlist.playlistId !== item.playlistId
+                        );
+
+                        setMyPlaylist(newMyPlaylist);
+                      }}
+                    >
+                      <Ionicons
+                        name="remove-circle-outline"
+                        size={24}
+                        color="#fff"
+                      />
+                    </TouchableOpacity>
+                  </TouchableOpacity>
+                );
+              }}
+              keyExtractor={(item) => item.playlistId}
+              scrollEnabled={false}
+            />
+            <FlatList
+              data={playlist}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.libraryItem}
+                  onPress={() =>
+                    navigation.navigate("PlayList", {
+                      id: item.playlistId,
+                    })
+                  }
+                >
+                  <Image
+                    source={{ uri: item?.thumbnail }}
+                    style={styles.playlistItemImage}
+                  />
+                  <View style={styles.itemTextContainer}>
+                    <Text style={styles.libraryTitle}>{item?.name}</Text>
+                    <Text style={styles.librarySubtitle}>Playlist</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      const newPlaylist = playlist.filter((currentPlaylist) => {
+                        return currentPlaylist.playlistId !== item.playlistId;
+                      });
+                      setPlaylist(newPlaylist);
+                      removePlaylistFromUserLibrary(
+                        item.playlistId,
+                        userInfo,
+                        setUserInfo
+                      );
+                    }}
+                  >
+                    <Ionicons
+                      name="remove-circle-outline"
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item?.playlistId}
+              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+              scrollEnabled={false}
+            />
+          </>
+        )}
+
+        {filterType === "Artist" && (
+          <>
+            <FlatList
+              data={selectedArtists}
+              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
+              renderItem={({ item }) => (
+                <TouchableOpacity
+                  style={styles.libraryItem}
+                  onPress={() => navigateToArtistPage(item)}
+                >
+                  <Image
+                    source={{ uri: item.thumbnail }}
+                    style={styles.musicItemImage}
+                  />
+                  <View style={styles.itemTextContainer}>
+                    <Text style={styles.libraryTitle}>{item.name}</Text>
+                    <Text style={styles.librarySubtitle}>Artist</Text>
+                  </View>
+
+                  <TouchableOpacity
+                    onPress={() => {
+                      const newSelectedArtists = selectedArtists.filter(
+                        (artist) => {
+                          return artist.artistId !== item.artistId;
+                        }
+                      );
+                      setSelectedArtists(newSelectedArtists);
+                      removeArtistFromUserLibrary(
+                        item.artistId,
+                        userInfo,
+                        setUserInfo
+                      );
+                    }}
+                  >
+                    <Ionicons
+                      name="remove-circle-outline"
+                      size={24}
+                      color="#fff"
+                    />
+                  </TouchableOpacity>
+                </TouchableOpacity>
+              )}
+              keyExtractor={(item) => item.id}
+              scrollEnabled={false}
+            />
+          </>
+        )}
       </ScrollView>
+
+      <View style={{ height: 50 }} />
 
       <View style={styles.buttonsContainer}>
         <View style={styles.buttonRow}>
@@ -215,7 +543,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "space-between",
     paddingHorizontal: 20,
-    paddingVertical: 15,
+    paddingTop: 33,
   },
   headerTitle: {
     fontSize: 24,
@@ -227,6 +555,8 @@ const styles = StyleSheet.create({
     flexWrap: "wrap",
     paddingHorizontal: 10,
     marginBottom: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: "#282828",
   },
   filterButton: {
     backgroundColor: "#333",
@@ -237,7 +567,7 @@ const styles = StyleSheet.create({
   },
   filterText: {
     color: "#fff",
-    fontSize: 14,
+    fontSize: 15,
   },
   libraryList: {
     paddingHorizontal: 10,
@@ -269,6 +599,8 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   libraryTitle: {
+    flexWrap: "wrap",
+    width: 200,
     color: "#fff",
     fontSize: 16,
     fontWeight: "bold",
@@ -278,9 +610,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
   },
   buttonsContainer: {
+    position: "absolute",
+    bottom: 50,
     paddingVertical: 10,
     paddingHorizontal: 10,
     flexDirection: "column",
+    height: 100,
   },
   addButton: {
     flexDirection: "row",
@@ -310,6 +645,28 @@ const styles = StyleSheet.create({
   itemTextContainer: {
     marginLeft: 8,
     minWidth: 280,
+  },
+  playlistItemImage: {
+    width: 50,
+    height: 50,
+    borderRadius: 10,
+    backgroundColor: "#fff",
+  },
+  itemTextContainer: {
+    marginLeft: 8,
+    minWidth: 280,
+  },
+  itemTitle: {
+    color: "#fff",
+    fontSize: 18,
+    marginTop: 8,
+    textAlign: "left",
+  },
+  activeFilterButton: {
+    backgroundColor: "#1fdf64", // Example highlight color
+  },
+  activeFilterText: {
+    color: "black", // Example text color when active
   },
 });
 

@@ -198,6 +198,7 @@ const HomeScreen = ({ navigation }) => {
                     dispatch(setRadioUrl(""));
                     dispatch(setShowSubPlayer(false));
                     dispatch(setShowPlayer(true));
+                    dispatch(setPlaylist([]));
                     dispatch(setIsPlaying(true));
                   } else {
                     dispatch(setIsPlaying(false));
@@ -260,6 +261,7 @@ const HomeScreen = ({ navigation }) => {
           data={homeData}
           renderItem={renderSection}
           keyExtractor={(item, index) => index.toString()}
+          ListFooterComponent={<View style={{ height: 100 }}></View>}
         />
       )}
     </SafeAreaView>

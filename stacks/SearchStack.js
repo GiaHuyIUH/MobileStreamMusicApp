@@ -21,19 +21,7 @@ export default function SearchStack() {
         name="CategoryDetail"
         component={CategoryDetail}
         options={{
-          headerTitle: "",
-          headerBackground: () => {
-            return (
-              <View
-                style={{
-                  background: "#0080AE",
-                  flex: 1,
-                }}
-              ></View>
-            );
-          },
-          headerTintColor: "white",
-          headerShadowVisible: false,
+          headerShown: false,
         }}
       />
       <Stack.Screen
@@ -45,7 +33,7 @@ export default function SearchStack() {
             return (
               <View
                 style={{
-                  backgroundColor: "#000",
+                  backgroundColor: "#121212",
                   opacity: 0.8,
                   flex: 1,
                 }}
@@ -53,7 +41,7 @@ export default function SearchStack() {
             );
           },
           headerSearchBarOptions: {
-            backgroundColor: "#000",
+            backgroundColor: "#121212",
           },
           headerTitle: () => <HeaderSearch></HeaderSearch>,
         }}
@@ -62,38 +50,14 @@ export default function SearchStack() {
         name="PlayList"
         component={PlayList}
         options={{
-          headerTitle: "",
-          headerBackground: () => {
-            return (
-              <View
-                style={{
-                  background: "#0080AE",
-                  flex: 1,
-                }}
-              ></View>
-            );
-          },
-          headerTintColor: "white",
-          headerShadowVisible: false,
+          headerShown: false,
         }}
       />
       <Stack.Screen
         name="Artist"
         component={Artist}
         options={{
-          headerTitle: "",
-          headerBackground: () => {
-            return (
-              <View
-                style={{
-                  background: "#0080AE",
-                  flex: 1,
-                }}
-              ></View>
-            );
-          },
-          headerTintColor: "white",
-          headerShadowVisible: false,
+          headerShown: false,
         }}
       />
     </Stack.Navigator>

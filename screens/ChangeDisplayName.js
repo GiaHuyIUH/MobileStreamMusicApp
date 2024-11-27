@@ -17,53 +17,32 @@ export default function ChangeDisplayName() {
   const [displayName, setDisplayName] = React.useState("");
   const handleChangeDisplayName = async () => {
     if (displayName.length === 0) {
-      Alert.alert("Lỗi", "Tên hiển thị không được để trống");
+      Alert.alert("Error", "Display name cannot be empty");
       return;
     } else {
       await updateProfile(auth.currentUser, {
-        displayName: displayName,
+        userName: displayName,
       });
       setUserInfo((prevState) => ({
         ...prevState,
-        displayName: displayName,
+        userName: displayName,
       }));
     }
   };
   return (
     <View style={styles.container}>
-      <Text style={{ color: "white", fontSize: 30, fontWeight: 700 }}>
-        Change your display name
-      </Text>
+      <Text style={styles.title}>Change your display name</Text>
       <TextInput
-        style={{
-          width: "100%",
-          padding: 10,
-          borderRadius: 10,
-          backgroundColor: "white",
-          borderColor: "white",
-          borderWidth: 1,
-          fontSize: 20,
-          fontWeight: 500,
-        }}
+        style={styles.input}
         defaultValue={userInfo.displayName}
-        onChangeText={(text) => setDisplayName(text)}
+        onChangeText={setDisplayName}
+        placeholder="Display name"
       ></TextInput>
       <Pressable
-        onPress={handleChangeDisplayName}
-        style={{
-          width: 100,
-          padding: 10,
-          borderRadius: 10,
-          backgroundColor: "#F62682",
-          fontSize: 20,
-          fontWeight: 500,
-          alignItems: "center",
-          justifyContent: "center",
-        }}
+        onPress={() => handleChangeDisplayName()}
+        style={styles.button}
       >
-        <Text style={{ color: "white", fontSize: 20, fontWeight: 500 }}>
-          Complete
-        </Text>
+        <Text style={styles.buttonText}>Complete</Text>
       </Pressable>
     </View>
   );
@@ -72,10 +51,38 @@ export default function ChangeDisplayName() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: "#191414", // Spotify's dark background color
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
     gap: 20,
+  },
+  title: {
+    color: "#1DB954", // Spotify's green color
+    fontSize: 30,
+    fontWeight: "bold",
+  },
+  input: {
+    width: "100%",
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#FFFFFF",
+    borderColor: "#FFFFFF",
+    borderWidth: 1,
+    fontSize: 20,
+    fontWeight: "500",
+  },
+  button: {
+    width: 100,
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: "#1DB954", // Spotify's green color
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  buttonText: {
+    color: "#FFFFFF",
+    fontSize: 20,
+    fontWeight: "500",
   },
 });

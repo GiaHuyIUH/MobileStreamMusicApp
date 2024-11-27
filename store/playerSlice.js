@@ -5,6 +5,7 @@ const playerSlice = createSlice({
   initialState: {
     showPlayer: false,
     data: {},
+    optionData: {},
     isPlaying: false,
     audioUrl: "",
     radioUrl: "",
@@ -25,6 +26,9 @@ const playerSlice = createSlice({
     },
     setPlayerData: (state, action) => {
       state.data = action.payload;
+    },
+    setOptionData: (state, action) => {
+      state.optionData = action.payload;
     },
     setIsPlaying: (state, action) => {
       state.isPlaying = action.payload;
@@ -78,6 +82,7 @@ const playerSlice = createSlice({
 export const {
   setShowPlayer,
   setPlayerData,
+  setOptionData,
   setIsPlaying,
   setAudioUrl,
   setRadioUrl,

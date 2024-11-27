@@ -82,19 +82,6 @@ class AudioService {
       this.sound.setOnPlaybackStatusUpdate(callback);
     }
   }
-
-  // async reset() {
-  //   this.unload(); // Ensure audio is fully unloaded
-  //   this.sound = null; // Clear the sound reference
-  //   this.isLoaded = false; // Reset the loaded state
-  //   store.dispatch(
-  //     setAudioState({
-  //       isPlaying: false,
-  //       currentProgress: 0,
-  //       duration: 0,
-  //     })
-  //   ); // Reset Redux state
-  // }
 }
 
 export default new AudioService();

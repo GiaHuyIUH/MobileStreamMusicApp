@@ -17,9 +17,15 @@ const TabNavigator = ({ navigation }) => {
   const playerData = useSelector((state) => state.player.data);
   const showSubPlayer = useSelector((state) => state.player.showSubPlayer);
   const { userInfo } = useAuth();
-  if (!userInfo) {
-    navigation.navigate("LogInScreen");
-  }
+  React.useEffect(() => {
+    // Chỉ reset nếu chắc chắn user chưa đăng nhập
+    if (userInfo === null) {
+      navigation.reset({
+        index: 0,
+        routes: [{ name: "LogInScreen" }],
+      });
+    }
+  }, [userInfo, navigation]);
 
   return (
     <>
@@ -50,7 +56,7 @@ const TabNavigator = ({ navigation }) => {
             backgroundColor: "#121212",
             borderTopWidth: 0,
             paddingBottom: 5,
-            height: 55,
+            height: 46,
           },
         })}
       >
@@ -76,11 +82,12 @@ const TabNavigator = ({ navigation }) => {
         <View
           style={{
             position: "absolute",
-            bottom: 55, // Adjust to stay above the tab bar
+            bottom: 50, // Adjust to stay above the tab bar
             left: 0,
             right: 0,
             backgroundColor: "#121212",
             width: "100%",
+            display: showSubPlayer ? "flex" : "none",
           }}
         >
           <SubPlayer data={playerData} />
@@ -88,20 +95,22 @@ const TabNavigator = ({ navigation }) => {
       )}
 
       {/* Display Player at the bottom when showPlayer is true */}
-      <View
-        style={{
-          position: "absolute",
-          width: "100%",
-          backgroundColor: "#121212",
-          top: 0,
-          bottom: 0,
-          left: 0,
-          right: 0,
-          display: showPlayer ? "flex" : "none",
-        }}
-      >
-        <TrackViewScreen />
-      </View>
+      {showPlayer && (
+        <View
+          style={{
+            position: "absolute",
+            width: "100%",
+            backgroundColor: "#121212",
+            top: 0,
+            bottom: 0,
+            left: 0,
+            right: 0,
+            display: showPlayer ? "flex" : "none",
+          }}
+        >
+          <TrackViewScreen />
+        </View>
+      )}
     </>
   );
 };

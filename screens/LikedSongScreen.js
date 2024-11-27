@@ -22,10 +22,9 @@ import {
   setShowPlayer,
 } from "../store/playerSlice"; // Adjust path as needed
 import { useAuth } from "../context/auth-context";
-import { getInfoSong } from "../apis/song";
-import { Entypo } from "@expo/vector-icons";
 import axios from "axios";
 import AudioService from "../services/AudioService";
+import removeSongFromUserLibrary from "../utils/removeSongfromUserLibrary";
 
 export default function LikedSongScreen({ navigation }) {
   const [likedSongs, setLikedSongs] = useState([]);
@@ -80,6 +79,10 @@ export default function LikedSongScreen({ navigation }) {
       </LinearGradient>
     </View>
   );
+
+  const handleRemoveSong = (songId) => {
+    removeSongFromUserLibrary(songId, userInfo, setUserInfo);
+  };
 
   const handlePlayPause = async () => {
     if (isPlaying) {
@@ -151,8 +154,8 @@ export default function LikedSongScreen({ navigation }) {
       <Text style={{ color: "green", fontWeight: "600" }}>
         {item?.streamingStatus === 1 ? "" : "VIP"}
       </Text>
-      <TouchableOpacity>
-        <Entypo name="dots-three-vertical" color="white" size={14} />
+      <TouchableOpacity onPress={() => handleRemoveSong(item?.encodeId)}>
+        <IonIcons name="remove-circle" color="white" size={18} />
       </TouchableOpacity>
     </TouchableOpacity>
   );
@@ -169,7 +172,7 @@ export default function LikedSongScreen({ navigation }) {
         <FlatList
           data={likedSongs}
           renderItem={renderSongItem}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item.encodeId}
           ListHeaderComponent={renderHeader}
           stickyHeaderIndices={[0]}
           ListFooterComponent={<View style={{ height: 100 }}></View>}

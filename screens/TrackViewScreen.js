@@ -1,14 +1,12 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
-  SafeAreaView,
   View,
   Text,
   Image,
   TouchableOpacity,
   StyleSheet,
   FlatList,
-  Modal,
-  ScrollView,
+  ToastAndroid,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
@@ -26,14 +24,16 @@ import {
   setPlayerData,
   setIsRepeat,
   setIsRandom,
+  setIsLove,
 } from "../store/playerSlice";
 import AudioService from "../services/AudioService"; // Import AudioService
-import { useNavigation } from "@react-navigation/core";
-import TrackOptionsBottomSheet from "./TrackOptionsBottomSheet";
 import TrackOptionBottomSheet from "./TrackOptionsBottomSheet";
+import { useAuth } from "../context/auth-context";
+import addSongIntoUserLibrary from "../utils/addSongIntoUserLibrary";
 
 const TrackViewScreen = () => {
-  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const { userInfo, setUserInfo } = useAuth();
   const singleSong = useSelector((state) => state.player.data);
   const isPlaying = useSelector((state) => state.player.isPlaying);
   const currentProgress = useSelector((state) => state.player.currentProgress);
@@ -42,57 +42,23 @@ const TrackViewScreen = () => {
   const currentSongIndex = useSelector(
     (state) => state.player.currentSongIndex
   );
-  const data = useSelector((state) => state.player.data);
   const isRepeat = useSelector((state) => state.player.isRepeat);
   const isRandom = useSelector((state) => state.player.isRandom);
   const isLove = useSelector((state) => state.player.isLove);
-  const dispatch = useDispatch();
   const lyrics = useLyric(singleSong.encodeId);
   const [album, setAlbum] = useState(null);
-  const [isSheetVisible, setIsSheetVisible] = useState(true);
 
   const bottomSheetRef = useRef(null);
-  // State để hiển thị modal
-  const [modalVisible, setModalVisible] = useState(false);
-  const [intervalId, setIntervalId] = useState(null); // To store interval ID
 
   const [currentLyricIndex, setCurrentLyricIndex] = useState(0);
   const flatListRef = useRef(null);
+  const isDisable = playlist.length === 0 ? true : false;
 
   const trackData = {
     cover: singleSong.thumbnail,
     title: singleSong.title,
     artist: singleSong.artistsNames,
   };
-
-  const controls = [
-    { id: "1", icon: "heart-outline", name: "Like" },
-    { id: "2", icon: "eye-off-outline", name: "Hide song" },
-    { id: "3", icon: "playlist-music-outline", name: "Add to playlist" },
-    { id: "4", icon: "playlist-plus", name: "Add to queue" },
-    { id: "5", icon: "share-outline", name: "Share" },
-    { id: "6", icon: "radio", name: "Go to radio" },
-    {
-      id: "7",
-      icon: "album",
-      name: "View album",
-      onPress: () =>
-        navigation.navigate("AlbumRadioScreen", { album: trackData }),
-    },
-    { id: "8", icon: "account-music", name: "View artist" },
-    { id: "9", icon: "music-circle-outline", name: "Song credits" },
-    { id: "10", icon: "moon-waning-crescent", name: "Sleep timer" },
-  ];
-
-  const renderControlItem = ({ item }) => (
-    <TouchableOpacity
-      style={styles.controlItem}
-      onPress={item.onPress} // Thêm sự kiện chuyển hướng cho biểu tượng album
-    >
-      <MaterialCommunityIcons name={item.icon} size={24} color="#fff" />
-      <Text style={styles.controlText}>{item.name}</Text>
-    </TouchableOpacity>
-  );
 
   useEffect(() => {
     async function fetchAndPlaySong() {
@@ -118,62 +84,27 @@ const TrackViewScreen = () => {
             console.error("Error fetching song details:", error);
             dispatch(setIsPlaying(false)); // Đặt isPlaying về false nếu có lỗi
           }
-        } else {
-          await AudioService.play(); // Tự động phát nhạc sau khi tải xong
         }
+        // else {
+        //   await AudioService.play(); // Tự động phát nhạc sau khi tải xong
+        //   dispatch(setIsPlaying(true));
+        // }
+      } else {
+        ToastAndroid.showWithGravityAndOffset(
+          "🎵 This song is only for VIP users 🎶",
+          ToastAndroid.LONG,
+          ToastAndroid.BOTTOM,
+          0, // xOffset
+          100 // yOffset
+        );
+        setTimeout(() => {
+          handleNext();
+        }, 2000);
       }
     }
 
     fetchAndPlaySong();
-
-    return () => {
-      if (intervalId) {
-        clearInterval(intervalId);
-      }
-    };
   }, [singleSong]);
-
-  // Start/Stop updating the progress when play/pause
-  // useEffect(() => {
-  //   if (isPlaying) {
-  //     const id = setInterval(async () => {
-  //       const status = await AudioService.sound.getStatusAsync();
-  //       if (status.isLoaded) {
-  //         const position = status.positionMillis;
-  //         dispatch(setCurrentProgress(position / status.durationMillis));
-
-  //         // Check if the song has ended
-  //         if (status.didJustFinish) {
-  //           if (isRepeat) {
-  //             handleRepeat();
-  //           } else if (isRandom) {
-  //             handleRandomSong();
-  //           } else {
-  //             if (currentSongIndex === playlist.length - 1) {
-  //               dispatch(setCurrentProgress(0));
-  //               dispatch(setCurrentSongIndex(0));
-  //               dispatch(setPlayerData(playlist[0]));
-  //               dispatch(setIsPlaying(false));
-  //             } else {
-  //               handleNext();
-  //             }
-  //           }
-  //         }
-  //       }
-  //     }, 1000); // Update every second
-  //     setIntervalId(id); // Save the interval ID for cleanup
-  //   } else {
-  //     if (intervalId) {
-  //       clearInterval(intervalId); // Stop updating progress if paused
-  //     }
-  //   }
-
-  //   return () => {
-  //     if (intervalId) {
-  //       clearInterval(intervalId);
-  //     }
-  //   };
-  // }, [isPlaying, duration]);
 
   useEffect(() => {
     if (AudioService.sound) {
@@ -287,7 +218,6 @@ const TrackViewScreen = () => {
       dispatch(setAudioUrl(""));
       dispatch(setRadioUrl(""));
       dispatch(setPlayerData(playlist[currentSongIndex + 1]));
-      dispatch(setIsPlaying(true));
     }
   }, [currentSongIndex, playlist]);
 
@@ -298,7 +228,6 @@ const TrackViewScreen = () => {
       dispatch(setAudioUrl(""));
       dispatch(setRadioUrl(""));
       dispatch(setCurrentProgress(0));
-      dispatch(setIsPlaying(true));
     }
   }, [currentSongIndex, playlist]);
   const handleRepeat = useCallback(() => {
@@ -317,6 +246,19 @@ const TrackViewScreen = () => {
     AudioService.playFromStart();
   }, [playlist]);
 
+  // Handle add song to liked songs
+  const handleAdd = () => {
+    dispatch(setIsLove(true));
+    addSongIntoUserLibrary(
+      singleSong?.encodeId,
+      singleSong?.title,
+      singleSong?.thumbnailM,
+      singleSong?.artistsNames,
+      userInfo,
+      setUserInfo
+    );
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.header}>
@@ -328,7 +270,9 @@ const TrackViewScreen = () => {
         >
           <Ionicons name="chevron-down" size={24} color="#fff" />
         </TouchableOpacity>
-        <Text style={styles.albumTitle}>{album?.album?.title || "Album"}</Text>
+        <Text style={styles.albumTitle}>
+          {album?.album?.title || singleSong.title}
+        </Text>
         <TouchableOpacity onPress={() => bottomSheetRef.current.open()}>
           <Ionicons name="ellipsis-horizontal" size={24} color="#fff" />
         </TouchableOpacity>
@@ -339,11 +283,27 @@ const TrackViewScreen = () => {
         style={styles.albumCover}
       />
 
-      <View style={styles.trackInfo}>
-        <Text style={styles.trackTitle}>{singleSong.title}</Text>
-        <Text style={styles.trackArtist}>{singleSong.artistsNames}</Text>
-      </View>
+      <View
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          justifyContent: "space-between",
+          paddingHorizontal: 20,
+        }}
+      >
+        <View style={styles.trackInfo}>
+          <Text style={styles.trackTitle}>{singleSong.title}</Text>
+          <Text style={styles.trackArtist}>{singleSong.artistsNames}</Text>
+        </View>
 
+        <TouchableOpacity onPress={handleAdd}>
+          <Ionicons
+            name={isLove ? "heart" : "heart-outline"}
+            size={24}
+            color={isLove ? "#1DB954" : "#fff"}
+          />
+        </TouchableOpacity>
+      </View>
       <View style={styles.progressContainer}>
         <Slider
           style={{ width: "100%", height: 20 }}
@@ -364,15 +324,26 @@ const TrackViewScreen = () => {
       </View>
 
       <View style={styles.controlsContainer}>
-        <TouchableOpacity onPress={() => dispatch(setIsRandom(!isRandom))}>
-          <MaterialCommunityIcons
-            name="shuffle"
-            size={24}
-            color={isRandom === true ? "#1DB954" : "#fff"}
-          />
+        <TouchableOpacity
+          onPress={() => dispatch(setIsRandom(!isRandom))}
+          disabled={isDisable || isRepeat}
+        >
+          {isDisable || isRepeat ? (
+            <MaterialCommunityIcons name="shuffle" size={24} color="#282a36" />
+          ) : (
+            <MaterialCommunityIcons
+              name="shuffle"
+              size={24}
+              color={isRandom === true ? "#1DB954" : "#fff"}
+            />
+          )}
         </TouchableOpacity>
-        <TouchableOpacity onPress={handlePrev}>
-          <Ionicons name="play-skip-back-outline" size={24} color="#fff" />
+        <TouchableOpacity onPress={handlePrev} disabled={isDisable}>
+          <Ionicons
+            name="play-skip-back-outline"
+            size={24}
+            color={isDisable ? "#282a36" : "#fff"}
+          />
         </TouchableOpacity>
         <TouchableOpacity style={styles.playButton} onPress={handlePlayPause}>
           <Ionicons
@@ -381,15 +352,26 @@ const TrackViewScreen = () => {
             color="#fff"
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleNext}>
-          <Ionicons name="play-skip-forward-outline" size={24} color="#fff" />
-        </TouchableOpacity>
-        <TouchableOpacity onPress={() => dispatch(setIsRepeat(!isRepeat))}>
-          <MaterialCommunityIcons
-            name="repeat"
+        <TouchableOpacity onPress={handleNext} disabled={isDisable}>
+          <Ionicons
+            name="play-skip-forward-outline"
             size={24}
-            color={isRepeat === true ? "#1DB954" : "#fff"}
+            color={isDisable ? "#282a36" : "#fff"}
           />
+        </TouchableOpacity>
+        <TouchableOpacity
+          onPress={() => dispatch(setIsRepeat(!isRepeat))}
+          disabled={isRandom}
+        >
+          {isRandom ? (
+            <MaterialCommunityIcons name="repeat" size={24} color="#282a36" />
+          ) : (
+            <MaterialCommunityIcons
+              name="repeat"
+              size={24}
+              color={isRepeat === true ? "#1DB954" : "#fff"}
+            />
+          )}
         </TouchableOpacity>
       </View>
 
@@ -456,7 +438,6 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   trackInfo: {
-    alignItems: "center",
     paddingHorizontal: 20,
     marginBottom: 10,
   },
@@ -469,7 +450,7 @@ const styles = StyleSheet.create({
   trackArtist: {
     color: "#B0B0B0",
     fontSize: 16,
-    textAlign: "center",
+    textAlign: "left",
     marginTop: 5,
   },
   progressContainer: {
@@ -495,31 +476,12 @@ const styles = StyleSheet.create({
   playButton: {
     alignItems: "center",
   },
-  footerIcons: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 20,
-  },
   lyricsContainer: {
     flex: 1,
     alignItems: "center",
     backgroundColor: "#282828",
     borderRadius: 10,
     marginHorizontal: 20,
-  },
-  modalOverlay: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-    backgroundColor: "rgba(0, 0, 0, 0.5)",
-    zIndex: 10,
-  },
-  modalContainer: {
-    flex: 1,
-    width: "100%",
-    backgroundColor: "#121212",
-    borderRadius: 10,
-    padding: 20,
   },
   lyricItem: {
     marginBottom: 10,
@@ -529,49 +491,6 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontWeight: "bold",
     textAlign: "center",
-  },
-  header1: {
-    alignItems: "center",
-    paddingVertical: 20,
-  },
-  albumCover1: {
-    width: 150,
-    height: 150,
-    borderRadius: 10,
-    marginBottom: 15,
-    resizeMode: "contain",
-  },
-  albumTitle1: {
-    fontSize: 20,
-    color: "#fff",
-    fontWeight: "bold",
-    textAlign: "center",
-  },
-  artistName: {
-    fontSize: 16,
-    color: "#B0B0B0",
-    marginTop: 5,
-    textAlign: "center",
-  },
-  listContainer: {
-    paddingHorizontal: 20,
-  },
-  controlItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 15,
-    borderBottomWidth: 1,
-    borderBottomColor: "#282828",
-  },
-
-  closeButton: {
-    alignItems: "center",
-    paddingVertical: 15,
-    marginBottom: 20,
-  },
-  closeButtonText: {
-    color: "#fff",
-    fontSize: 16,
   },
   lyricItem: {
     padding: 10,

@@ -1,4 +1,10 @@
-import React, { forwardRef, useRef, useImperativeHandle } from "react";
+import React, {
+  forwardRef,
+  useRef,
+  useImperativeHandle,
+  useState,
+  useEffect,
+} from "react";
 import {
   View,
   Text,
@@ -7,12 +13,28 @@ import {
   TouchableOpacity,
   Image,
   Button,
+  ToastAndroid,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import RBSheet from "react-native-raw-bottom-sheet";
+import { useAuth } from "../context/auth-context";
+import { useDispatch, useSelector } from "react-redux";
+import { setIsLove } from "../store/playerSlice";
+import addSongIntoUserLibrary from "../utils/addSongIntoUserLibrary";
+import { useNavigation } from "@react-navigation/core";
+import removeSongFromUserLibrary from "../utils/removeSongfromUserLibrary";
 
 const TrackOptionBottomSheet = forwardRef(({ trackData }, ref) => {
+  const navigation = useNavigation();
+  const optionData = useSelector((state) => state.player.optionData);
   const refRBSheet = useRef();
+  const { userInfo, setUserInfo } = useAuth();
+  const dispatch = useDispatch();
+  const [isLiked, setIsLiked] = useState(false);
+
+  useEffect(() => {
+    setIsLiked(userInfo?.Songs?.find((s) => s.songId === optionData?.encodeId));
+  }, [userInfo]);
 
   useImperativeHandle(ref, () => ({
     open: () => {
@@ -22,8 +44,32 @@ const TrackOptionBottomSheet = forwardRef(({ trackData }, ref) => {
       refRBSheet.current.close();
     },
   }));
+
+  // Handle add song to liked songs
+  const handleAdd = () => {
+    dispatch(setIsLove(!isLiked));
+    if (!isLiked) {
+      addSongIntoUserLibrary(
+        optionData?.encodeId,
+        optionData?.title,
+        optionData?.thumbnailM,
+        optionData?.artistsNames,
+        userInfo,
+        setUserInfo
+      );
+    } else {
+      removeSongFromUserLibrary(optionData?.encodeId, userInfo, setUserInfo);
+    }
+    refRBSheet.current.close();
+  };
+
   const controls = [
-    { id: "1", icon: "heart-outline", name: "Like" },
+    {
+      id: "1",
+      icon: isLiked ? "heart" : "heart-outline",
+      name: isLiked ? "Unlike" : "Like",
+      onPress: () => handleAdd(),
+    },
     { id: "2", icon: "eye-off-outline", name: "Hide song" },
     { id: "3", icon: "playlist-music-outline", name: "Add to playlist" },
     { id: "4", icon: "playlist-plus", name: "Add to queue" },
@@ -34,7 +80,7 @@ const TrackOptionBottomSheet = forwardRef(({ trackData }, ref) => {
       icon: "album",
       name: "View album",
       onPress: () =>
-        navigation.navigate("AlbumRadioScreen", { album: trackData }),
+        navigation.navigate("AlbumViewScreen", { album: trackData }),
     },
     { id: "8", icon: "account-music", name: "View artist" },
     { id: "9", icon: "music-circle-outline", name: "Song credits" },

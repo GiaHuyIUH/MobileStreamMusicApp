@@ -7,7 +7,6 @@ import SignUpScreen2 from "../screens/SignUpScreen2";
 import ChooseArtistScreen from "../screens/ChooseArtistScreen";
 import LogInScreen from "../screens/LogInScreen";
 import LogInNotPassScreen from "../screens/LogInNotPassScreen";
-import HomeScreen from "../screens/HomeScreen";
 import TabNavigator from "./TabNavigator";
 import UserSettingScreen from "../screens/UserSettingScreen";
 
@@ -66,11 +65,6 @@ const LoginStackNavigator = () => {
           component={LogInNotPassScreen}
           options={{ ...setting, headerTitle: "Log in without password" }}
         />
-        {/* <Stack.Screen
-          name="HomeScreen"
-          component={HomeScreen}
-          options={{ headerShown: false }}
-        /> */}
         <Stack.Screen
           name="MainFlow"
           component={TabNavigator} // Use TabNavigator here
