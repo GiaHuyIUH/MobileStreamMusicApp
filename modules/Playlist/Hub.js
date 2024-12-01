@@ -1,3 +1,4 @@
+import React, { useEffect } from "react";
 import {
   ActivityIndicator,
   Image,
@@ -7,7 +8,6 @@ import {
   Text,
   View,
 } from "react-native";
-import React from "react";
 import Swiper from "react-native-swiper/src";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -20,19 +20,23 @@ import PlaylistHeader from "./PlaylistHeader";
 import ListMusics from "./ListMusics";
 
 export default function Hub({ data, navigation }) {
+  const dispatch = useDispatch();
   const itemData = data?.sections?.slice(0, 2);
+
+  useEffect(() => {
+    if (itemData && itemData[1]?.items) {
+      dispatch(setPlaylist(itemData[1]?.items));
+      dispatch(setCurrentProgress(0));
+      dispatch(setCurrentSongIndex(0));
+    }
+  }, [itemData, dispatch]);
+
   if (!itemData) {
     return (
       <View style={styles.container}>
         <ActivityIndicator size="large" color="#00ff00" />
       </View>
     );
-  }
-  const dispatch = useDispatch();
-  if (itemData[1]?.items) {
-    dispatch(setPlaylist(itemData[1]?.items));
-    dispatch(setCurrentProgress(0));
-    dispatch(setCurrentSongIndex(0));
   }
 
   return (
@@ -44,7 +48,7 @@ export default function Hub({ data, navigation }) {
             style={{
               color: "white",
               fontSize: 20,
-              fontWeight: 700,
+              fontWeight: "700",
               marginTop: 20,
               textTransform: "capitalize",
             }}
@@ -55,36 +59,34 @@ export default function Hub({ data, navigation }) {
             style={{ height: 200, marginTop: 10 }}
             showsPagination={false}
           >
-            {itemData[0]?.items.map((item, index) => {
-              return (
-                <Pressable
-                  onPress={() => {
-                    dispatch(setIsPlaying(false));
-                    dispatch(setCurrentProgress(0));
-                    dispatch(setCurrentSongIndex(0));
-                    navigation.navigate("PlayList", {
-                      id: item.encodeId,
-                    });
-                  }}
-                  key={index}
+            {itemData[0]?.items.map((item, index) => (
+              <Pressable
+                key={index}
+                onPress={() => {
+                  dispatch(setIsPlaying(false));
+                  dispatch(setCurrentProgress(0));
+                  dispatch(setCurrentSongIndex(0));
+                  navigation.navigate("PlayList", {
+                    id: item.encodeId,
+                  });
+                }}
+                style={{
+                  flex: 1,
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Image
+                  source={{ uri: item.thumbnailM }}
                   style={{
-                    flex: 1,
-                    justifyContent: "center",
-                    alignItems: "center",
+                    width: "100%",
+                    height: "100%",
+                    borderRadius: 8,
+                    resizeMode: "contain",
                   }}
-                >
-                  <Image
-                    source={{ uri: item.thumbnailM }}
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: 8,
-                      resizeMode: "contain",
-                    }}
-                  ></Image>
-                </Pressable>
-              );
-            })}
+                />
+              </Pressable>
+            ))}
           </Swiper>
         </View>
       </View>
@@ -93,7 +95,7 @@ export default function Hub({ data, navigation }) {
           style={{
             color: "white",
             fontSize: 20,
-            fontWeight: 700,
+            fontWeight: "700",
             marginTop: 20,
             textTransform: "capitalize",
           }}
@@ -110,7 +112,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#121212",
     flex: 1,
-    paddingTop: 40,
     paddingLeft: 16,
     paddingRight: 16,
     overflow: "scroll",

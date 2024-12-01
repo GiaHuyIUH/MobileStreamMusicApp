@@ -14,6 +14,7 @@ import {
   setPlaylist,
   setRadioUrl,
   setShowPlayer,
+  setShowSubPlayer,
 } from "../../store/playerSlice";
 import { TouchableOpacity } from "react-native";
 
@@ -112,13 +113,13 @@ export default function SearchView({ navigation }) {
                   <SongItem
                     data={data.top}
                     onPress={() => {
-                      dispatch(setCurrentSongIndex(0));
                       dispatch(setCurrentProgress(0));
-                      dispatch(setPlaylist([]));
                       dispatch(setPlayerData(data.top));
                       dispatch(setAudioUrl(""));
                       dispatch(setRadioUrl(""));
+                      dispatch(setShowSubPlayer(false));
                       dispatch(setShowPlayer(true));
+                      dispatch(setPlaylist([]));
                       dispatch(setIsPlaying(true));
                     }}
                   ></SongItem>

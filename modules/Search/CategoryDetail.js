@@ -18,7 +18,7 @@ export default function CategoryDetail({ route, navigation }) {
   return (
     <>
       {item.id === 1 ? <NewRelease data={data} /> : null}
-      {item.id > 2 ? <Hub data={data} navigation={navigation} /> : null}
+      {item.id > 1 ? <Hub data={data} navigation={navigation} /> : null}
     </>
   );
 }

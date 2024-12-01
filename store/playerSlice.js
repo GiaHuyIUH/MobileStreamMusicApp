@@ -6,6 +6,7 @@ const playerSlice = createSlice({
     showPlayer: false,
     data: {},
     optionData: {},
+    albumData: {},
     isPlaying: false,
     audioUrl: "",
     radioUrl: "",
@@ -18,7 +19,7 @@ const playerSlice = createSlice({
     playlist: [],
     playlistId: "",
     isLove: false,
-    isLoading: false,
+    // isLoading: false,
   },
   reducers: {
     setShowPlayer: (state, action) => {
@@ -29,6 +30,9 @@ const playerSlice = createSlice({
     },
     setOptionData: (state, action) => {
       state.optionData = action.payload;
+    },
+    setAlbumData: (state, action) => {
+      state.albumData = action.payload;
     },
     setIsPlaying: (state, action) => {
       state.isPlaying = action.payload;
@@ -66,9 +70,9 @@ const playerSlice = createSlice({
     setIsLove: (state, action) => {
       state.isLove = action.payload;
     },
-    setIsLoading: (state, action) => {
-      state.isLoading = action.payload;
-    },
+    // setIsLoading: (state, action) => {
+    //   state.isLoading = action.payload;
+    // },
 
     // Action để cập nhật trạng thái audio từ AudioService
     setAudioState: (state, action) => {
@@ -83,6 +87,7 @@ export const {
   setShowPlayer,
   setPlayerData,
   setOptionData,
+  setAlbumData,
   setIsPlaying,
   setAudioUrl,
   setRadioUrl,
@@ -95,7 +100,7 @@ export const {
   setPlaylist,
   setPlaylistId,
   setIsLove,
-  setIsLoading,
+  // setIsLoading,
   setAudioState, // Export action mới này
 } = playerSlice.actions;
 export default playerSlice.reducer;

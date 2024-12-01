@@ -1,10 +1,4 @@
-import {
-  ScrollView,
-  StyleSheet,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { ScrollView, StyleSheet } from "react-native";
 import React, { useEffect } from "react";
 import PlaylistHeader from "./PlaylistHeader";
 import ListMusics from "./ListMusics";
@@ -12,7 +6,6 @@ import axios from "axios";
 import { zingmp3Api } from "../../apis/constants";
 import { useDispatch } from "react-redux";
 import { setPlaylist } from "../../store/playerSlice";
-import IonIcons from "@expo/vector-icons/Ionicons";
 import { useNavigation } from "@react-navigation/core";
 
 export default function Artist({ route }) {
@@ -22,13 +15,20 @@ export default function Artist({ route }) {
   const dispatch = useDispatch();
   useEffect(() => {
     async function fetchPlayListData() {
-      const res = await axios.get(zingmp3Api.getAlbumPage(id));
-      const data = res.data;
-      setData(data.data);
-      dispatch(setPlaylist(data?.data?.song.items));
+      try {
+        const res = await axios.get(zingmp3Api.getAlbumPage(id));
+        const data = res.data;
+        setData(data.data);
+        if (data?.data?.song?.items) {
+          dispatch(setPlaylist(data.data.song.items));
+        }
+      } catch (error) {
+        console.error("Failed to fetch playlist data:", error);
+      }
     }
     fetchPlayListData();
-  }, []);
+  }, [id, dispatch]);
+
   return (
     <ScrollView style={styles.container}>
       <PlaylistHeader data={data} type="playlist" />

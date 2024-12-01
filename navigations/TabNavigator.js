@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import SearchStack from "../stacks/SearchStack";
 import HomeStack from "../stacks/HomeStack";
 import LibraryStack from "../stacks/LibraryStack";
-import SubPlayer from "../modules/Player/SubPlayer";
+import SubPlayer from "../screens/SubPlayer";
 import TrackViewScreen from "../screens/TrackViewScreen";
 import { useAuth } from "../context/auth-context";
 

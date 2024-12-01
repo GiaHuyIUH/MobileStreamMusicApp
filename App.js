@@ -4,7 +4,10 @@ import { useFonts } from "expo-font";
 import { Provider } from "react-redux";
 import store from "./store/configureStore";
 import { AuthProvider } from "./context/auth-context";
-import { NavigationContainer } from "@react-navigation/native";
+import {
+  createNavigationContainerRef,
+  NavigationContainer,
+} from "@react-navigation/native";
 import StartScreen from "./screens/StartScreen";
 import SignUpScreen1 from "./screens/SignUpScreen1";
 import SignUpScreen2 from "./screens/SignUpScreen2";
@@ -16,6 +19,8 @@ import ChangeDisplayName from "./screens/ChangeDisplayName";
 import ChangePassword from "./screens/ChangePassword";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import TabNavigator from "./navigations/TabNavigator";
+
+export const navigationRef = createNavigationContainerRef();
 
 const Stack = createNativeStackNavigator();
 
@@ -30,6 +35,12 @@ const setting = {
     fontWeight: "bold", // Customize title text style
   },
 };
+
+export function navigate(name, params) {
+  if (navigationRef.isReady()) {
+    navigationRef.navigate(name, params);
+  }
+}
 
 export default function App() {
   // Load the font
@@ -51,7 +62,7 @@ export default function App() {
     <>
       <Provider store={store}>
         <AuthProvider>
-          <NavigationContainer>
+          <NavigationContainer ref={navigationRef}>
             <Stack.Navigator>
               <Stack.Screen
                 name="Start"

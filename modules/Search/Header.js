@@ -3,9 +3,10 @@ import React, { useEffect, useState } from "react";
 import { onAuthStateChanged } from "firebase/auth";
 import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../../components/firebase";
+import { useAuth } from "../../context/auth-context";
 
 export default function Header({ title, navigation }) {
-  const [userInfo, setUserInfo] = useState(null);
+  const { userInfo, setUserInfo } = useAuth();
   const fetchUserData = async (currentUser) => {
     try {
       // Only attempt to fetch data if there is a logged-in user

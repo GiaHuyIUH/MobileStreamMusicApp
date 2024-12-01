@@ -19,9 +19,8 @@ export default function NewRelease({ data }) {
 
 const styles = StyleSheet.create({
   container: {
-    backgroundColor: "#000",
+    backgroundColor: "#121212",
     flex: 1,
-    paddingTop: 40,
     paddingLeft: 16,
     paddingRight: 16,
     overflow: "scroll",

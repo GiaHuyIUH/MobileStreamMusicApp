@@ -1,7 +1,6 @@
 import {
   ActivityIndicator,
   Image,
-  Pressable,
   StyleSheet,
   Text,
   ToastAndroid,
@@ -28,12 +27,12 @@ import TrackOptionBottomSheet from "../../screens/TrackOptionsBottomSheet";
 export default function ListMusics({ data, type, onAddMusic }) {
   const dispatch = useDispatch();
   const songData = useSelector((state) => state.player.data);
-  const optionData = useSelector((state) => state.player.optionData);
-  const trackData = {
-    cover: optionData.thumbnail,
-    title: optionData.title,
-    artist: optionData.artistsNames,
-  };
+  // const optionData = useSelector((state) => state.player.optionData);
+  // const trackData = {
+  //   cover: optionData.thumbnail,
+  //   title: optionData.title,
+  //   artist: optionData.artistsNames,
+  // };
   const refRBSheet = useRef();
   const handleAddMusicToMyPlayList = () => {
     onAddMusic();
@@ -126,6 +125,9 @@ export default function ListMusics({ data, type, onAddMusic }) {
               alignItems: "center",
               gap: 10,
               marginTop: 10,
+              paddingBottom: 10,
+              borderBottomColor: "#282828",
+              borderBottomWidth: 1,
             }}
           >
             <Text
@@ -174,7 +176,7 @@ export default function ListMusics({ data, type, onAddMusic }) {
           </TouchableOpacity>
         );
       })}
-      <TrackOptionBottomSheet ref={refRBSheet} trackData={trackData} />
+      <TrackOptionBottomSheet ref={refRBSheet} />
     </View>
   );
 }

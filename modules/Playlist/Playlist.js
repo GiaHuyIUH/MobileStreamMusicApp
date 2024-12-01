@@ -4,6 +4,7 @@ import PlaylistHeader from "./PlaylistHeader";
 import ListMusics from "./ListMusics";
 import axios from "axios";
 import { useDispatch } from "react-redux";
+import { LogBox } from "react-native";
 import {
   setCurrentProgress,
   setCurrentSongIndex,
@@ -23,11 +24,6 @@ export default function PlayList({ navigation, route }) {
   console.log("PlayList ~ songData:", songData);
   const dispatch = useDispatch();
   const { userInfo, setUserInfo } = useAuth();
-  const [myPlayListSongs, setMyPlayListSongs] = useState(null);
-
-  const handleAddMusicToMyPlayList = () => {
-    navigation.navigate("AddSongToPlaylistScreen", { id: MyPlaylistId });
-  };
 
   useEffect(() => {
     async function fetchSongData() {
@@ -80,6 +76,12 @@ export default function PlayList({ navigation, route }) {
       fetchPlayListData();
     }, [MyPlaylistId, id, userInfo])
   );
+
+  // Ignore specific warning messages
+  LogBox.ignoreLogs([
+    "Warning: Internal React error: Expected static flag was missing",
+  ]);
+
   return (
     <ScrollView style={styles.container}>
       {type === "liked" && (
@@ -106,7 +108,7 @@ export default function PlayList({ navigation, route }) {
           <ListMusics data={songData} type="liked" />
         </>
       )}
-      {MyPlaylistId && (
+      {/* {MyPlaylistId && (
         <>
           <ListMusics
             data={myPlayListSongs}
@@ -114,7 +116,7 @@ export default function PlayList({ navigation, route }) {
             onAddMusic={handleAddMusicToMyPlayList}
           />
         </>
-      )}
+      )} */}
     </ScrollView>
   );
 }
@@ -123,7 +125,6 @@ const styles = StyleSheet.create({
   container: {
     backgroundColor: "#121212",
     flex: 1,
-    paddingTop: 40,
     paddingLeft: 16,
     paddingRight: 16,
     overflow: "scroll",

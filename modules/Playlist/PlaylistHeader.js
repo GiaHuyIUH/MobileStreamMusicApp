@@ -1,4 +1,4 @@
-import { ActivityIndicator, Image, Pressable, Text, View } from "react-native";
+import { Image, Pressable, Text, View } from "react-native";
 import React from "react";
 import Entypo from "@expo/vector-icons/Entypo";
 import { Ionicons } from "@expo/vector-icons";
@@ -24,8 +24,6 @@ export default function PlaylistHeader({ data, type, myPlaylist, isLiked }) {
   }
   const { userInfo, setUserInfo } = useAuth();
   const isPlaying = useSelector((state) => state.player.isPlaying);
-  const playlist = useSelector((state) => state.player.playlist);
-
   const isLove = useSelector((state) => state.player.isLove);
   const playlistId = useSelector((state) => state.player.playlistId);
   const dispatch = useDispatch();
@@ -76,22 +74,6 @@ export default function PlaylistHeader({ data, type, myPlaylist, isLiked }) {
         {!myPlaylist && type === "newrelease" && (
           <Image
             source={{ uri: data?.items?.[0].thumbnailM }}
-            style={{
-              top: 10,
-              left: "50%",
-              width: 200,
-              height: 200,
-              resizeMode: "cover",
-              borderRadius: 9999,
-              transform: [{ translateX: -100 }], // Half of the image width
-            }}
-          ></Image>
-        )}
-        {!myPlaylist && type === "radio" && (
-          <Image
-            source={{
-              uri: data?.items?.[0]?.items?.[0]?.thumbnailM,
-            }}
             style={{
               top: 10,
               left: "50%",
