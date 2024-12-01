@@ -6,7 +6,7 @@ import {
   arrayUnion,
 } from "firebase/firestore";
 import { auth, db } from "../components/firebase";
-import Toast from "react-native-toast-message";
+import { ToastAndroid } from "react-native";
 
 export default async function addPlaylistIntoUserLibrary(
   playlistId,
@@ -31,15 +31,7 @@ export default async function addPlaylistIntoUserLibrary(
       userDoc.exists() &&
       userDoc.data().Playlist?.some((pl) => pl.playlistId === playlistId)
     ) {
-      Toast.show({
-        type: "success",
-        text1: "Thông báo",
-        text2: "Playlist đã có trong thư viện của bạn",
-        visibilityTime: 2000,
-        autoHide: true,
-        topOffset: 30,
-        bottomOffset: 40,
-      });
+      ToastAndroid.show("Playlist existed", ToastAndroid.SHORT);
       return;
     }
 
@@ -52,25 +44,9 @@ export default async function addPlaylistIntoUserLibrary(
       ...userInfo,
       Playlist: [...(userInfo.Playlist || []), playlist],
     });
-    Toast.show({
-      type: "success",
-      text1: "Thông báo",
-      text2: "Thêm playlist vào thư viện thành công",
-      visibilityTime: 2000,
-      autoHide: true,
-      topOffset: 30,
-      bottomOffset: 40,
-    });
+    ToastAndroid.show("Add playlist success", ToastAndroid.SHORT);
   } catch (error) {
     console.log("error:", error);
-    Toast.show({
-      type: "error",
-      text1: "Thông báo",
-      text2: "Thêm playlist vào thư viện thất bại",
-      visibilityTime: 2000,
-      autoHide: true,
-      topOffset: 30,
-      bottomOffset: 40,
-    });
+    ToastAndroid.show("Add playlist failed", ToastAndroid.SHORT);
   }
 }

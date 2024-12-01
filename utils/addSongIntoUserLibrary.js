@@ -32,7 +32,7 @@ export default async function addSongIntoUserLibrary(
       userDoc.data().Songs?.some((s) => s.songId === songId)
     ) {
       ToastAndroid.show("Song already in library", ToastAndroid.SHORT);
-      return;
+      return false;
     }
 
     // Update the user's document by adding the song to the Songs array
@@ -46,9 +46,10 @@ export default async function addSongIntoUserLibrary(
       Songs: [...(userInfo.Songs || []), song],
     });
     ToastAndroid.show("Add song to library success", ToastAndroid.SHORT);
-    console.log("Song added to library");
+    return true;
   } catch (error) {
     console.log("error:", error);
     ToastAndroid.show("Add song to library failed", ToastAndroid.SHORT);
+    return true;
   }
 }

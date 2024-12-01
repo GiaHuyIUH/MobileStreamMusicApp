@@ -26,7 +26,7 @@ export default async function removeSongFromUserLibrary(
     if (!userDoc.exists() || !song) {
       console.log("Song not found in library");
       ToastAndroid.show("Song not found in library", ToastAndroid.SHORT);
-      return;
+      return false;
     }
 
     // Update the user's document by removing the song from the Songs array
@@ -42,8 +42,10 @@ export default async function removeSongFromUserLibrary(
     });
     console.log("Song removed from library");
     ToastAndroid.show("Remove song from library success", ToastAndroid.SHORT);
+    return true;
   } catch (error) {
     console.log("error:", error);
     ToastAndroid.show("Remove song from library failed", ToastAndroid.SHORT);
+    return false;
   }
 }

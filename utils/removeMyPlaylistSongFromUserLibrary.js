@@ -65,7 +65,7 @@ export default async function removeMyPlaylistSongFromUserLibrary(
     }
 
     ToastAndroid.show(
-      "Song removed from your playlist successfully",
+      "Playlist removed from your playlist successfully",
       ToastAndroid.SHORT
     );
   } catch (error) {
