@@ -24,9 +24,9 @@ const data = [
   },
   {
     id: 2,
-    title: "Radio",
+    title: "Lofi",
     color: "#678026",
-    api: zingmp3Api.getRadioPage(),
+    api: zingmp3Api.getHubDetail("IWZ9Z096"),
   },
   {
     id: 3,

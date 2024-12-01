@@ -4,7 +4,6 @@ import {
   Text,
   FlatList,
   StyleSheet,
-  Dimensions,
   TouchableOpacity,
   ActivityIndicator,
   Image,
@@ -49,7 +48,7 @@ export default function LikedSongScreen({ navigation }) {
       setIsLoading(false);
     };
     fetchLikedSongs();
-  }, [userInfo?.Songs]);
+  }, []);
 
   console.log("LikedSongScreen ~ likedSongs:", likedSongs);
 
@@ -80,8 +79,19 @@ export default function LikedSongScreen({ navigation }) {
     </View>
   );
 
-  const handleRemoveSong = (songId) => {
-    removeSongFromUserLibrary(songId, userInfo, setUserInfo);
+  const handleRemoveSong = async (songId) => {
+    try {
+      if (removeSongFromUserLibrary(songId, userInfo, setUserInfo)) {
+        // Loại bỏ bài hát khỏi danh sách hiện tại
+        setTimeout(() => {
+          setLikedSongs((prevSongs) =>
+            prevSongs.filter((song) => song.encodeId !== songId)
+          );
+        }, 3000);
+      }
+    } catch (error) {
+      console.error("Failed to remove song:", error);
+    }
   };
 
   const handlePlayPause = async () => {

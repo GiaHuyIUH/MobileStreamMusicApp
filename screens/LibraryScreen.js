@@ -13,14 +13,8 @@ import { Ionicons } from "@expo/vector-icons";
 import { useAuth } from "../context/auth-context";
 import { useDispatch } from "react-redux";
 import Header from "../modules/Search/Header";
-import {
-  setCurrentProgress,
-  setIsPlaying,
-  setShowSubPlayer,
-} from "../store/playerSlice";
+import { setCurrentProgress } from "../store/playerSlice";
 import removeArtistFromUserLibrary from "../utils/removeArtistFromUserLibrary";
-import removeMyPlayListFromUserLibrary from "../utils/removeMyPlayListFromUserLibrary";
-import removeMyPlaylistSongFromUserLibrary from "../utils/removeMyPlaylistSongFromUserLibrary";
 import removePlaylistFromUserLibrary from "../utils/removePlaylistfromUserLibrary";
 
 const LibraryScreen = ({ route, navigation }) => {
@@ -30,7 +24,6 @@ const LibraryScreen = ({ route, navigation }) => {
   );
 
   const [playlist, setPlaylist] = useState(userInfo?.Playlist || []);
-  const [myPlaylist, setMyPlaylist] = useState(userInfo?.MyPlaylist);
   const dispatch = useDispatch();
   console.log("userInfo", userInfo);
   const [filterType, setFilterType] = useState("All");
@@ -46,6 +39,7 @@ const LibraryScreen = ({ route, navigation }) => {
 
   useEffect(() => {
     setSelectedArtists(userInfo?.Artist || []);
+    setPlaylist(userInfo?.Playlist || []);
   }, [userInfo]);
 
   const renderLibraryItem = ({ item }) => (
@@ -80,7 +74,7 @@ const LibraryScreen = ({ route, navigation }) => {
     if (item.type === "Artist") {
       navigation.navigate("ArtistPage", { item });
     } else if (item.title === "Liked Songs") {
-      dispatch(setIsPlaying(false));
+      // dispatch(setIsPlaying(false));
       dispatch(setCurrentProgress(0));
       navigation.navigate("LikedSongScreen", {
         type: "liked",
@@ -165,82 +159,6 @@ const LibraryScreen = ({ route, navigation }) => {
               data={sections}
               renderItem={renderLibraryItem}
               keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-            <FlatList
-              data={myPlaylist}
-              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
-              renderItem={({ item }) => {
-                const playlistSong = userInfo?.MyPlaylistSongs?.find(
-                  (playlist) => playlist.playlistId === item.playlistId
-                );
-                const uri = playlistSong
-                  ? playlistSong.song.thumbnailM
-                  : item.thumbnail;
-                return (
-                  <TouchableOpacity
-                    style={styles.libraryItem}
-                    onPress={() => {
-                      dispatch(setIsPlaying(false));
-                      dispatch(setCurrentProgress(0));
-                      navigation.navigate("PlayList", {
-                        MyPlaylistId: item.playlistId,
-                      });
-                    }}
-                  >
-                    <Image
-                      source={{ uri: uri }}
-                      style={styles.playlistItemImage}
-                    />
-                    <View style={styles.itemTextContainer}>
-                      <Text
-                        style={styles.libraryTitle}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {item.name}
-                      </Text>
-                      <Text style={styles.librarySubtitle}>Playlist</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        var songs = userInfo.MyPlaylistSongs.filter(
-                          (songPlaylist) =>
-                            item.playlistId === songPlaylist.playlistId
-                        );
-
-                        removeMyPlayListFromUserLibrary(
-                          item.playlistId,
-                          userInfo,
-                          setUserInfo
-                        );
-                        songs.forEach((song) => {
-                          removeMyPlaylistSongFromUserLibrary(
-                            item.playlistId,
-                            song.song.encodeId,
-                            userInfo,
-                            setUserInfo,
-                            true
-                          );
-                        });
-
-                        var newMyPlaylist = myPlaylist.filter(
-                          (playlist) => playlist.playlistId !== item.playlistId
-                        );
-
-                        setMyPlaylist(newMyPlaylist);
-                      }}
-                    >
-                      <Ionicons
-                        name="remove-circle-outline"
-                        size={24}
-                        color="#fff"
-                      />
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                );
-              }}
-              keyExtractor={(item) => item.playlistId}
               scrollEnabled={false}
             />
 
@@ -329,7 +247,7 @@ const LibraryScreen = ({ route, navigation }) => {
                   </TouchableOpacity>
                 </TouchableOpacity>
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.artistId}
               scrollEnabled={false}
             />
           </>
@@ -341,82 +259,6 @@ const LibraryScreen = ({ route, navigation }) => {
               data={sections}
               renderItem={renderLibraryItem}
               keyExtractor={(item) => item.id}
-              scrollEnabled={false}
-            />
-            <FlatList
-              data={myPlaylist}
-              ItemSeparatorComponent={() => <View style={{ height: 15 }} />}
-              renderItem={({ item }) => {
-                const playlistSong = userInfo?.MyPlaylistSongs?.find(
-                  (playlist) => playlist.playlistId === item.playlistId
-                );
-                const uri = playlistSong
-                  ? playlistSong.song.thumbnailM
-                  : item.thumbnail;
-                return (
-                  <TouchableOpacity
-                    style={styles.libraryItem}
-                    onPress={() => {
-                      dispatch(setIsPlaying(false));
-                      dispatch(setCurrentProgress(0));
-                      navigation.navigate("PlayList", {
-                        MyPlaylistId: item.playlistId,
-                      });
-                    }}
-                  >
-                    <Image
-                      source={{ uri: uri }}
-                      style={styles.playlistItemImage}
-                    />
-                    <View style={styles.itemTextContainer}>
-                      <Text
-                        style={styles.libraryTitle}
-                        numberOfLines={1}
-                        ellipsizeMode="tail"
-                      >
-                        {item.name}
-                      </Text>
-                      <Text style={styles.librarySubtitle}>Playlist</Text>
-                    </View>
-                    <TouchableOpacity
-                      onPress={() => {
-                        var songs = userInfo.MyPlaylistSongs.filter(
-                          (songPlaylist) =>
-                            item.playlistId === songPlaylist.playlistId
-                        );
-
-                        removeMyPlayListFromUserLibrary(
-                          item.playlistId,
-                          userInfo,
-                          setUserInfo
-                        );
-                        songs.forEach((song) => {
-                          removeMyPlaylistSongFromUserLibrary(
-                            item.playlistId,
-                            song.song.encodeId,
-                            userInfo,
-                            setUserInfo,
-                            true
-                          );
-                        });
-
-                        var newMyPlaylist = myPlaylist.filter(
-                          (playlist) => playlist.playlistId !== item.playlistId
-                        );
-
-                        setMyPlaylist(newMyPlaylist);
-                      }}
-                    >
-                      <Ionicons
-                        name="remove-circle-outline"
-                        size={24}
-                        color="#fff"
-                      />
-                    </TouchableOpacity>
-                  </TouchableOpacity>
-                );
-              }}
-              keyExtractor={(item) => item.playlistId}
               scrollEnabled={false}
             />
             <FlatList
@@ -509,7 +351,7 @@ const LibraryScreen = ({ route, navigation }) => {
                   </TouchableOpacity>
                 </TouchableOpacity>
               )}
-              keyExtractor={(item) => item.id}
+              keyExtractor={(item) => item.artistId}
               scrollEnabled={false}
             />
           </>

@@ -8,8 +8,6 @@ import {
 } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { useAuth } from "../context/auth-context";
-import { addMyPlayListIntoUserLibrary } from "../utils/addMyPlayListIntoUserLibrary";
-import { addSongsToMyPlaylist } from "../utils/addSongToMyPlaylist";
 
 export default function CreatePlaylistScreen({ route, navigation }) {
   const [playlistName, setPlaylistName] = useState("");
@@ -30,21 +28,6 @@ export default function CreatePlaylistScreen({ route, navigation }) {
     setPlaylistName("My playlist #" + id);
     setPlaceHolder("My playlist #" + id);
   }, []);
-
-  const handleAddPlaylist = () => {
-    addMyPlayListIntoUserLibrary(
-      id,
-      playlistName,
-      "https://icons-for-free.com/iconfiles/png/512/music+note+sound+icon-1320183235697157602.png",
-      userInfo,
-      setUserInfo
-    );
-    navigation.navigate("LibraryScreen");
-
-    navigation.pop();
-
-    navigation.navigate("AddSongToPlaylistScreen", { id: id });
-  };
 
   return (
     <LinearGradient colors={["#5e6869", "#000000"]} style={styles.container}>
@@ -67,10 +50,7 @@ export default function CreatePlaylistScreen({ route, navigation }) {
         >
           <Text style={styles.buttonTextCancel}>Cancel</Text>
         </TouchableOpacity>
-        <TouchableOpacity
-          style={styles.createButton}
-          onPress={handleAddPlaylist}
-        >
+        <TouchableOpacity style={styles.createButton}>
           <Text style={styles.buttonTextCreate}>Create</Text>
         </TouchableOpacity>
       </View>

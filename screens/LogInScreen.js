@@ -5,7 +5,7 @@ import {
   TextInput,
   StyleSheet,
   TouchableOpacity,
-  ActivityIndicator,
+  Alert,
 } from "react-native";
 import Feather from "@expo/vector-icons/Feather";
 import { signInWithEmailAndPassword } from "firebase/auth";
@@ -13,9 +13,10 @@ import { auth } from "../components/firebase";
 import { useAuth } from "../context/auth-context";
 
 const LogInScreen = ({ navigation }) => {
-  const [email, setEmail] = useState("tranhuy12072003@gmail.com");
+  const [email, setEmail] = useState("tranhuyzaza@gmail.com");
   const [password, setPassword] = useState("Anhbakhia3@");
   const [showPassword, setShowPassword] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const { userInfo } = useAuth();
   useEffect(() => {
@@ -25,7 +26,26 @@ const LogInScreen = ({ navigation }) => {
   }, [userInfo]);
 
   const handleLogin = async () => {
-    await signInWithEmailAndPassword(auth, email, password);
+    setErrorMessage(""); // Xóa thông báo lỗi trước khi thử đăng nhập
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      navigation.navigate("MainFlow"); // Chuyển đến màn hình chính nếu đăng nhập thành công
+    } catch (error) {
+      // Phân tích lỗi và cập nhật thông báo
+      switch (error.code) {
+        case "auth/invalid-email":
+          setErrorMessage("Invalid email please try again.");
+          break;
+        case "auth/user-not-found":
+          setErrorMessage("User not found please sign up.");
+          break;
+        case "auth/wrong-password":
+          setErrorMessage("Wrong password please try again.");
+          break;
+        default:
+          setErrorMessage("Something went wrong please try again.");
+      }
+    }
   };
 
   return (
@@ -42,9 +62,6 @@ const LogInScreen = ({ navigation }) => {
             autoCapitalize="none"
           />
         </View>
-        <Text style={styles.label}>
-          You'll need to confirm this email later.
-        </Text>
 
         {/* Password field */}
         <Text style={styles.PrimaryLabel}>Password</Text>
@@ -63,12 +80,16 @@ const LogInScreen = ({ navigation }) => {
             />
           </TouchableOpacity>
         </View>
-        <Text style={styles.label}>Use atleast 8 characters.</Text>
+
+        {/* Error Message */}
+        {errorMessage ? (
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        ) : null}
+
         <View
           style={{ flex: 1, alignItems: "center", justifyContent: "center" }}
         >
           <TouchableOpacity
-            // disabled={email.length || password.length < 8 ? true : false}
             style={{
               backgroundColor: "#ccc",
               borderRadius: 30,
@@ -78,7 +99,7 @@ const LogInScreen = ({ navigation }) => {
             }}
             onPress={handleLogin}
           >
-            <Text style={[styles.PrimaryLabel, { color: "#000" }]}>Log in</Text>
+            <Text style={[styles.PrimaryLabel, { color: "#000" }]}>Login</Text>
           </TouchableOpacity>
           <TouchableOpacity
             style={{
@@ -96,7 +117,7 @@ const LogInScreen = ({ navigation }) => {
                 { textDecorationLine: "underline", fontSize: 16 },
               ]}
             >
-              Log in without password
+              Login without password
             </Text>
           </TouchableOpacity>
         </View>
@@ -120,19 +141,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 10,
     marginBottom: 20,
   },
-  title: {
-    fontSize: 24,
-    marginBottom: 16,
-    textAlign: "center",
-  },
-  input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 12,
-    paddingHorizontal: 8,
-    backgroundColor: "#7777",
-  },
   inputPass: {
     flex: 1,
     height: 50,
@@ -147,8 +155,13 @@ const styles = StyleSheet.create({
   label: {
     fontSize: 12,
     marginBottom: 5,
-    color: "#fff", // Optional: change color to gray
-    // fontWeight: "bold",
+    color: "#fff",
+  },
+  errorText: {
+    color: "red",
+    fontSize: 14,
+    marginVertical: 10,
+    textAlign: "center",
   },
 });
 

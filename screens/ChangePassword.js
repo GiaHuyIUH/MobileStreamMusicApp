@@ -1,217 +1,133 @@
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
-import React from "react";
-import { useAuth } from "../context/auth-context";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { doc, setDoc, updateDoc } from "firebase/firestore";
-import { auth, db } from "../components/firebase";
+import React, { useState } from "react";
+import { View, TextInput, Button, Alert, StyleSheet, Text } from "react-native";
 import {
+  getAuth,
   EmailAuthProvider,
   reauthenticateWithCredential,
   updatePassword,
 } from "firebase/auth";
-export default function ChangePassword() {
+import { useAuth } from "../context/auth-context";
+import { auth } from "../components/firebase";
+import { useNavigation } from "@react-navigation/core";
+
+const ChangePasswordScreen = () => {
   const { userInfo, setUserInfo } = useAuth();
-  const [togglePassword, setTogglePassword] = React.useState(false);
-  const [toggleNewPassword, setToggleNewPassword] = React.useState(false);
-  const [password, setPassword] = React.useState("");
-  const [newPassword, setNewPassword] = React.useState("");
-  const [errorPassword, setErrorPassword] = React.useState("");
-  const [errorNewPassword, setErrorNewPassword] = React.useState("");
-  const handleChangePassword = async () => {
-    if (password !== userInfo.password) {
-      setErrorPassword("Password is incorrect");
-      setErrorNewPassword("");
-      return;
-    } else {
-      if (newPassword === "") {
-        setErrorNewPassword("New password cannot be empty");
-        setErrorPassword("");
-        return;
-      } else if (newPassword === password) {
-        setErrorNewPassword(
-          "New password cannot be the same as the current password"
-        );
-        setErrorPassword("");
-        return;
-      } else if (
-        newPassword.match(
-          /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/
-        ) === null
-      ) {
-        setErrorNewPassword(
-          "New password must be at least 8 characters, including uppercase letters, lowercase letters, numbers, and special characters"
-        );
-        setErrorPassword("");
-        return;
-      } else {
-        const user = auth.currentUser;
-        const credential = EmailAuthProvider.credential(user?.email, password);
-        await reauthenticateWithCredential(auth.currentUser, credential);
-        await updatePassword(auth.currentUser, newPassword);
-        await setDoc(
-          doc(db, "users", auth.currentUser.uid),
-          {
-            password: newPassword,
-          },
-          { merge: true }
-        );
-        // Update password in userInfo
-        setUserInfo({
-          ...userInfo,
-          password: newPassword,
-        });
-      }
+  const [email, setEmail] = useState(userInfo?.email || "");
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const navigation = useNavigation();
+
+  const handleLogout = async () => {
+    try {
+      await auth.signOut();
+      setUserInfo(null);
+      navigation.navigate("Start");
+    } catch (error) {
+      console.error("Error during logout:", error);
     }
   };
+
+  const handleChangePassword = async () => {
+    try {
+      const auth = getAuth();
+      const user = auth.currentUser;
+
+      if (!user) {
+        throw new Error("No user is logged in.");
+      }
+
+      // Step 1: Reauthenticate user
+      await reauthenticateUser(user, email, oldPassword);
+
+      // Step 2: Update password
+      await updateUserPassword(user, newPassword);
+
+      Alert.alert("Success", "Password updated successfully");
+      handleLogout();
+    } catch (error) {
+      Alert.alert("Error", error.message);
+    }
+  };
+
+  const reauthenticateUser = async (user, email, oldPassword) => {
+    try {
+      const credential = EmailAuthProvider.credential(email, oldPassword);
+      await reauthenticateWithCredential(user, credential);
+      console.log("Reauthentication successful");
+    } catch (error) {
+      throw new Error("Old password is incorrect. Please try again.");
+    }
+  };
+
+  const updateUserPassword = async (user, newPassword) => {
+    try {
+      await updatePassword(user, newPassword);
+      console.log("Password updated successfully");
+    } catch (error) {
+      throw new Error("Failed to update password. Please try again.");
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <View style={{ alignItems: "center" }}>
-        <Text style={{ color: "white", fontSize: 40, fontWeight: 700 }}>
-          Change your password
-        </Text>
+      <Text>Email</Text>
+      <TextInput
+        placeholder="Enter your email"
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+        style={styles.input}
+        editable={false}
+      />
+      <TextInput
+        placeholder="Enter old password"
+        secureTextEntry
+        value={oldPassword}
+        onChangeText={setOldPassword}
+        style={styles.input}
+      />
+      <TextInput
+        placeholder="Enter new password"
+        secureTextEntry
+        value={newPassword}
+        onChangeText={setNewPassword}
+        style={styles.input}
+      />
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Change Password"
+          onPress={handleChangePassword}
+          color="#1db954"
+        />
       </View>
-      <View style={{ gap: 10, marginBottom: 10 }}>
-        <Text style={{ color: "white", fontSize: 18, fontWeight: 700 }}>
-          Email address
-        </Text>
-        <TextInput
-          style={{
-            width: "100%",
-            padding: 10,
-            backgroundColor: "#333333",
-            fontSize: 20,
-            fontWeight: 500,
-            color: "white",
-            border: "none",
-            outline: "none",
-          }}
-          value={userInfo.email}
-        ></TextInput>
-      </View>
-      <View style={{ gap: 10, marginBottom: 10 }}>
-        <Text style={{ color: "white", fontSize: 18, fontWeight: 700 }}>
-          Current password
-        </Text>
-        <TextInput
-          placeholder="Nhập mật khẩu hiện tại"
-          style={{
-            width: "100%",
-            padding: 10,
-            backgroundColor: "#333333",
-            fontSize: 20,
-            fontWeight: 500,
-            color: "white",
-            border: "none",
-            outline: "none",
-          }}
-          secureTextEntry={!togglePassword ? true : false}
-          onChangeText={(text) => setPassword(text)}
-        ></TextInput>
-        {togglePassword ? (
-          <Ionicons
-            name="eye"
-            size={24}
-            color="white"
-            onPress={() => {
-              setTogglePassword(false);
-            }}
-          ></Ionicons>
-        ) : (
-          <Ionicons
-            name="eye-off"
-            size={24}
-            color="white"
-            onPress={() => {
-              setTogglePassword(true);
-            }}
-          ></Ionicons>
-        )}
-      </View>
-      {errorPassword && (
-        <Text style={styles.errorMessage}>{errorPassword}</Text>
-      )}
-      <View style={{ gap: 10, marginBottom: 10 }}>
-        <Text style={{ color: "white", fontSize: 18, fontWeight: 700 }}>
-          New password
-        </Text>
-        <TextInput
-          placeholder="Enter new password"
-          style={{
-            width: "100%",
-            padding: 10,
-            backgroundColor: "#333333",
-            fontSize: 20,
-            fontWeight: 500,
-            color: "white",
-            border: "none",
-            outline: "none",
-          }}
-          secureTextEntry={!toggleNewPassword ? true : false}
-          onChangeText={(text) => setNewPassword(text)}
-        ></TextInput>
-        {toggleNewPassword ? (
-          <Ionicons
-            name="eye"
-            size={24}
-            color="white"
-            onPress={() => {
-              setToggleNewPassword(false);
-            }}
-          ></Ionicons>
-        ) : (
-          <Ionicons
-            name="eye-off"
-            size={24}
-            color="white"
-            style={styles.icon}
-            onPress={() => {
-              setToggleNewPassword(true);
-            }}
-          ></Ionicons>
-        )}
-      </View>
-      {errorNewPassword && (
-        <Text style={styles.errorMessage}>{errorNewPassword}</Text>
-      )}
-      <Pressable
-        onPress={handleChangePassword}
-        style={{
-          width: "100%",
-          height: 50,
-          alignItems: "center",
-          justifyContent: "center",
-          backgroundColor: "#F62682",
-          borderRadius: 9999,
-        }}
-      >
-        <Text style={{ color: "white", fontSize: 20, fontWeight: 700 }}>
-          Save
-        </Text>
-      </Pressable>
     </View>
   );
-}
+};
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "black",
     justifyContent: "center",
-    gap: 20,
     padding: 20,
+    backgroundColor: "#121212", // Dark theme
   },
-  icon: {
-    width: "20px",
-    height: "20px",
-    color: "white",
-    position: "absolute",
-    top: "62%",
-    right: "15px",
+  input: {
+    height: 50,
+    backgroundColor: "#333", // Dark background for input fields
+    color: "#fff", // White text
+    borderRadius: 30, // Rounded corners
+    marginBottom: 16,
+    paddingHorizontal: 16,
+    fontSize: 16,
+    borderWidth: 1,
+    borderColor: "#444", // Slightly lighter border
   },
-  errorMessage: {
-    color: "red",
-    fontSize: "14px",
-    fontWeight: "bold",
-    marginTop: 5,
+  buttonContainer: {
+    marginTop: 20,
+    borderRadius: 30,
+    overflow: "hidden",
   },
 });
+
+export default ChangePasswordScreen;

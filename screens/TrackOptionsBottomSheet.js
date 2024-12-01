@@ -12,29 +12,33 @@ import {
   FlatList,
   TouchableOpacity,
   Image,
-  Button,
-  ToastAndroid,
 } from "react-native";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import RBSheet from "react-native-raw-bottom-sheet";
 import { useAuth } from "../context/auth-context";
 import { useDispatch, useSelector } from "react-redux";
-import { setIsLove } from "../store/playerSlice";
+import {
+  setIsLove,
+  setShowPlayer,
+  setShowSubPlayer,
+} from "../store/playerSlice";
 import addSongIntoUserLibrary from "../utils/addSongIntoUserLibrary";
 import { useNavigation } from "@react-navigation/core";
 import removeSongFromUserLibrary from "../utils/removeSongfromUserLibrary";
 
-const TrackOptionBottomSheet = forwardRef(({ trackData }, ref) => {
+const TrackOptionBottomSheet = forwardRef(({ route }, ref) => {
+  // const optionData = useSelector((state) => state.player.optionData);
   const navigation = useNavigation();
-  const optionData = useSelector((state) => state.player.optionData);
+  const album = useSelector((state) => state.player.albumData);
+  const singleSong = useSelector((state) => state.player.data);
   const refRBSheet = useRef();
   const { userInfo, setUserInfo } = useAuth();
   const dispatch = useDispatch();
   const [isLiked, setIsLiked] = useState(false);
 
-  useEffect(() => {
-    setIsLiked(userInfo?.Songs?.find((s) => s.songId === optionData?.encodeId));
-  }, [userInfo]);
+  // useEffect(() => {
+  //   setIsLiked(userInfo?.Songs?.find((s) => s.songId === optionData?.encodeId));
+  // }, [userInfo, optionData]);
 
   useImperativeHandle(ref, () => ({
     open: () => {
@@ -50,15 +54,15 @@ const TrackOptionBottomSheet = forwardRef(({ trackData }, ref) => {
     dispatch(setIsLove(!isLiked));
     if (!isLiked) {
       addSongIntoUserLibrary(
-        optionData?.encodeId,
-        optionData?.title,
-        optionData?.thumbnailM,
-        optionData?.artistsNames,
+        singleSong?.encodeId,
+        singleSong?.title,
+        singleSong?.thumbnailM,
+        singleSong?.artistsNames,
         userInfo,
         setUserInfo
       );
     } else {
-      removeSongFromUserLibrary(optionData?.encodeId, userInfo, setUserInfo);
+      removeSongFromUserLibrary(singleSong?.encodeId, userInfo, setUserInfo);
     }
     refRBSheet.current.close();
   };
@@ -79,10 +83,18 @@ const TrackOptionBottomSheet = forwardRef(({ trackData }, ref) => {
       id: "7",
       icon: "album",
       name: "View album",
-      onPress: () =>
-        navigation.navigate("AlbumViewScreen", { album: trackData }),
+      onPress: () => {
+        dispatch(setShowPlayer(false));
+        dispatch(setShowSubPlayer(true));
+        navigation.navigate("PlayList", { id: album.album.encodeId });
+      },
     },
-    { id: "8", icon: "account-music", name: "View artist" },
+    {
+      id: "8",
+      icon: "account-music",
+      name: "View artist",
+    },
+
     { id: "9", icon: "music-circle-outline", name: "Song credits" },
     { id: "10", icon: "moon-waning-crescent", name: "Sleep timer" },
   ];
@@ -127,10 +139,13 @@ const TrackOptionBottomSheet = forwardRef(({ trackData }, ref) => {
     >
       <View style={styles.container}>
         <View style={styles.header}>
-          <Image source={{ uri: trackData.cover }} style={styles.albumCover} />
+          <Image
+            source={{ uri: singleSong?.thumbnailM }}
+            style={styles.albumCover}
+          />
           <View style={styles.titleContainer}>
-            <Text style={styles.title}>{trackData.title}</Text>
-            <Text style={styles.artist}>{trackData.artist}</Text>
+            <Text style={styles.title}>{singleSong?.title}</Text>
+            <Text style={styles.artist}>{singleSong?.artistsNames}</Text>
           </View>
         </View>
         <FlatList

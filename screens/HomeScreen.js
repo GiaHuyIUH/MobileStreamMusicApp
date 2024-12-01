@@ -20,7 +20,6 @@ import { useDispatch } from "react-redux";
 import {
   setAudioUrl,
   setCurrentProgress,
-  setCurrentSongIndex,
   setIsPlaying,
   setPlayerData,
   setPlaylist,
@@ -201,7 +200,7 @@ const HomeScreen = ({ navigation }) => {
                     dispatch(setPlaylist([]));
                     dispatch(setIsPlaying(true));
                   } else {
-                    dispatch(setIsPlaying(false));
+                    // dispatch(setIsPlaying(false));
                     dispatch(setCurrentProgress(0));
                     navigation.navigate("PlayList", {
                       id: item.encodeId,

@@ -25,6 +25,7 @@ import {
   setIsRepeat,
   setIsRandom,
   setIsLove,
+  setAlbumData,
 } from "../store/playerSlice";
 import AudioService from "../services/AudioService"; // Import AudioService
 import TrackOptionBottomSheet from "./TrackOptionsBottomSheet";
@@ -46,7 +47,7 @@ const TrackViewScreen = () => {
   const isRandom = useSelector((state) => state.player.isRandom);
   const isLove = useSelector((state) => state.player.isLove);
   const lyrics = useLyric(singleSong.encodeId);
-  const [album, setAlbum] = useState(null);
+  const album = useSelector((state) => state.player.albumData);
 
   const bottomSheetRef = useRef(null);
 
@@ -54,11 +55,13 @@ const TrackViewScreen = () => {
   const flatListRef = useRef(null);
   const isDisable = playlist.length === 0 ? true : false;
 
-  const trackData = {
-    cover: singleSong.thumbnail,
-    title: singleSong.title,
-    artist: singleSong.artistsNames,
-  };
+  useEffect(() => {
+    if (userInfo?.Songs?.some((song) => song.songId === singleSong.encodeId)) {
+      dispatch(setIsLove(true));
+    } else {
+      dispatch(setIsLove(false));
+    }
+  }, [singleSong]);
 
   useEffect(() => {
     async function fetchAndPlaySong() {
@@ -71,7 +74,7 @@ const TrackViewScreen = () => {
           try {
             const songData = await getSong(singleSong.encodeId); // Lấy URL bài hát
             const res = await getInfoSong(singleSong.encodeId);
-            setAlbum(res.data);
+            dispatch(setAlbumData(res.data));
             dispatch(setAudioUrl(songData.data[128])); // Cập nhật URL vào Redux
 
             // Tải nhạc và tự động phát khi tải xong
@@ -104,7 +107,7 @@ const TrackViewScreen = () => {
     }
 
     fetchAndPlaySong();
-  }, [singleSong]);
+  }, [singleSong, userInfo]);
 
   useEffect(() => {
     if (AudioService.sound) {
@@ -213,6 +216,9 @@ const TrackViewScreen = () => {
   // Section to handle Next and Previous song
   const handleNext = useCallback(() => {
     if (currentSongIndex < playlist.length - 1) {
+      AudioService.pause();
+      AudioService.seek(0);
+      dispatch(setIsPlaying(false));
       dispatch(setCurrentProgress(0));
       dispatch(setCurrentSongIndex(currentSongIndex + 1));
       dispatch(setAudioUrl(""));
@@ -223,6 +229,9 @@ const TrackViewScreen = () => {
 
   const handlePrev = useCallback(() => {
     if (currentSongIndex > 0) {
+      AudioService.pause();
+      AudioService.seek(0);
+      dispatch(setIsPlaying(false));
       dispatch(setCurrentSongIndex(currentSongIndex - 1));
       dispatch(setPlayerData(playlist[currentSongIndex - 1]));
       dispatch(setAudioUrl(""));
@@ -352,7 +361,7 @@ const TrackViewScreen = () => {
             color="#fff"
           />
         </TouchableOpacity>
-        <TouchableOpacity onPress={handleNext} disabled={isDisable}>
+        <TouchableOpacity onPress={() => handleNext()} disabled={isDisable}>
           <Ionicons
             name="play-skip-forward-outline"
             size={24}
@@ -406,7 +415,7 @@ const TrackViewScreen = () => {
         )}
       </View>
 
-      <TrackOptionBottomSheet ref={bottomSheetRef} trackData={trackData} />
+      <TrackOptionBottomSheet ref={bottomSheetRef} />
     </View>
   );
 };
