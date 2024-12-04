@@ -78,7 +78,19 @@ const ArtistListScreen = ({ route, navigation }) => {
       navigation.goBack();
       return;
     } else {
-      selectedArtists?.forEach((artist) => {
+      // Lấy danh sách nghệ sĩ đã chọn trước đó từ route.params
+      const previouslySelectedArtists = route.params.selectedArtists || [];
+
+      // Lọc ra những nghệ sĩ mới được chọn
+      const newSelectedArtists = selectedArtists.filter(
+        (artist) =>
+          !previouslySelectedArtists.some(
+            (prevArtist) => prevArtist.id === artist.id
+          )
+      );
+
+      // Chỉ thêm những nghệ sĩ mới vào thư viện
+      newSelectedArtists.forEach((artist) => {
         const artistId = artist.id;
         const playlistId = artist.playlistId;
         const name = artist.name;
@@ -92,6 +104,7 @@ const ArtistListScreen = ({ route, navigation }) => {
           setUserInfo
         );
       });
+
       navigation.navigate("LibraryHome", { selectedArtists });
     }
   };
