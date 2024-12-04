@@ -1,5 +1,6 @@
 import React, { useState } from "react";
-import { View, TextInput, Button, Alert, StyleSheet, Text } from "react-native";
+import { View, TextInput, Button, Alert, StyleSheet, Text, TouchableOpacity } from "react-native";
+import { AntDesign } from "@expo/vector-icons"; // Import AntDesign icon
 import {
   getAuth,
   EmailAuthProvider,
@@ -15,6 +16,8 @@ const ChangePasswordScreen = () => {
   const [email, setEmail] = useState(userInfo?.email || "");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [oldPasswordVisible, setOldPasswordVisible] = useState(false); // Manage visibility for old password
+  const [newPasswordVisible, setNewPasswordVisible] = useState(false); // Manage visibility for new password
   const navigation = useNavigation();
 
   const handleLogout = async () => {
@@ -80,20 +83,38 @@ const ChangePasswordScreen = () => {
         style={styles.input}
         editable={false}
       />
-      <TextInput
-        placeholder="Enter old password"
-        secureTextEntry
-        value={oldPassword}
-        onChangeText={setOldPassword}
-        style={styles.input}
-      />
-      <TextInput
-        placeholder="Enter new password"
-        secureTextEntry
-        value={newPassword}
-        onChangeText={setNewPassword}
-        style={styles.input}
-      />
+      <View style={styles.passwordContainer}>
+        <TextInput
+          placeholder="Enter old password"
+          secureTextEntry={!oldPasswordVisible}
+          value={oldPassword}
+          onChangeText={setOldPassword}
+          style={styles.input}
+        />
+        <TouchableOpacity onPress={() => setOldPasswordVisible(!oldPasswordVisible)} style={styles.iconContainer}>
+          <AntDesign 
+            name={oldPasswordVisible ? "eye" : "eyeo"} 
+            size={24} 
+            color="#1db954" 
+          />
+        </TouchableOpacity>
+      </View>
+      <View style={styles.passwordContainer}>
+        <TextInput
+          placeholder="Enter new password"
+          secureTextEntry={!newPasswordVisible}
+          value={newPassword}
+          onChangeText={setNewPassword}
+          style={styles.input}
+        />
+        <TouchableOpacity onPress={() => setNewPasswordVisible(!newPasswordVisible)} style={styles.iconContainer}>
+          <AntDesign 
+            name={newPasswordVisible ? "eye" : "eyeo"} 
+            size={24} 
+            color="#1db954" 
+          />
+        </TouchableOpacity>
+      </View>
       <View style={styles.buttonContainer}>
         <Button
           title="Change Password"
@@ -127,6 +148,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
     borderRadius: 30,
     overflow: "hidden",
+  },
+  passwordContainer: {
+    position: "relative",
+  },
+  iconContainer: {
+    position: "absolute",
+    right: 16,
+    top: 12,
   },
 });
 
