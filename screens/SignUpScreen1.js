@@ -27,19 +27,18 @@ const SignUpScreen1 = ({ navigation }) => {
       if (!querySnapshot.empty) {
         setEmailMessage("This email is already registered.");
         return false;
-      } else {
-        setEmailMessage("You'll need to confirm this email later.");
-        return true;
-      }
+      } 
+      return true;
     } catch (error) {
       console.log(error);
     }
   };
 
   const handleNext = async () => {
+    const emailValid = checkEmail();
     const emailExists = await checkEmailExistence();
-    const emailAndPasswordValid = checkPassword();
-    if (emailExists && emailAndPasswordValid) {
+    const passwordValid = checkPassword();
+    if (emailValid && emailExists && passwordValid) {
       navigation.navigate("SignUpScreen2", {
         email: email,
         password: password,
@@ -47,18 +46,27 @@ const SignUpScreen1 = ({ navigation }) => {
     }
   };
 
+  const checkEmail = () => {
+    const regexEmail =
+      /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+    if (!regexEmail.test(email)) {
+      setEmailMessage("Please enter a valid email address.");
+      return false;
+    }
+    setEmailMessage(""); // Clear email error message if valid
+    return true;
+  };
+
   const checkPassword = () => {
     const regexPassword =
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{8,}$/;
-    if (regexPassword.test(password)) {
-      setPasswordMessage("Password is valid.");
-      return true;
-    } else if (!regexPassword.test(password)) {
+      /^(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*])[A-Za-z\d!@#$%^&*]{6,12}$/;
+    if (!regexPassword.test(password)) {
       setPasswordMessage(
-        "Password must contain at least 8 characters, including uppercase, lowercase, numbers, and special characters."
+        "Password must be 6-12 characters long, contain at least one uppercase letter, one number, and one special character."
       );
       return false;
     }
+    setPasswordMessage(""); // Clear password error message if valid
     return true;
   };
 
@@ -74,6 +82,7 @@ const SignUpScreen1 = ({ navigation }) => {
             onChangeText={setEmail}
             keyboardType="email-address"
             autoCapitalize="none"
+            onBlur={checkEmail} // Validate email on blur (when focus is lost)
           />
         </View>
         <Text style={styles.label}>{emailMessage}</Text>
@@ -86,6 +95,7 @@ const SignUpScreen1 = ({ navigation }) => {
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
+            onBlur={checkPassword} // Validate password on blur
           />
           <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
             <Feather
