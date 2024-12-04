@@ -196,6 +196,7 @@ const styles = StyleSheet.create({
     paddingTop: 40,
     paddingLeft: 16,
     paddingRight: 16,
+
   },
   stickyContainer: {
     position: "sticky", // Positioning to make it stick to top
