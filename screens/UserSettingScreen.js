@@ -4,14 +4,25 @@ import Toggle from "../components/Toggle";
 import { useAuth } from "../context/auth-context";
 import { auth } from "../components/firebase";
 import { TouchableOpacity } from "react-native";
+import AudioService from "../services/AudioService";
+import { useDispatch } from "react-redux";
+import { setIsPlaying, setShowPlayer, setShowSubPlayer } from "../store/playerSlice";
 
 export default function UserSettingScreen({ navigation }) {
   const { userInfo, setUserInfo } = useAuth();
+  const dispatch = useDispatch();
   console.log("UserSettingScreen ~ userInfo:", userInfo);
   const handleLogout = async () => {
     try {
       await auth.signOut();
       setUserInfo(null);
+
+      // Unload audio when logging out
+      AudioService.unload(); // Unload the audio to release resources
+      dispatch(setShowPlayer(false)); // Hide the player
+      dispatch(setShowSubPlayer(false)); // Hide the sub player
+      dispatch(setIsPlaying(false)); // Pause the audio
+
       navigation.navigate("Start");
     } catch (error) {
       console.error("Error during logout:", error);
