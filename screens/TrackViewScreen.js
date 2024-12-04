@@ -109,6 +109,7 @@ const TrackViewScreen = () => {
     fetchAndPlaySong();
   }, [singleSong, userInfo]);
 
+  // Handle playback status update
   useEffect(() => {
     if (AudioService.sound) {
       AudioService.setOnPlaybackStatusUpdate((status) => {
@@ -153,7 +154,11 @@ const TrackViewScreen = () => {
     if (index !== -1 && index !== currentLyricIndex) {
       setCurrentLyricIndex(index);
       if (flatListRef.current) {
-        flatListRef.current.scrollToIndex({ index, animated: true });
+        flatListRef.current.scrollToIndex({
+          index,
+          animated: true,
+          viewPosition: 0.1, // This centers the item in the view
+        });
       }
     }
   }, [currentProgress, duration]);
@@ -257,15 +262,18 @@ const TrackViewScreen = () => {
 
   // Handle add song to liked songs
   const handleAdd = () => {
-    dispatch(setIsLove(true));
-    addSongIntoUserLibrary(
-      singleSong?.encodeId,
-      singleSong?.title,
-      singleSong?.thumbnailM,
-      singleSong?.artistsNames,
-      userInfo,
-      setUserInfo
-    );
+    if (
+      addSongIntoUserLibrary(
+        singleSong?.encodeId,
+        singleSong?.title,
+        singleSong?.thumbnailM,
+        singleSong?.artistsNames,
+        userInfo,
+        setUserInfo
+      )
+    ) {
+      dispatch(setIsLove(true));
+    }
   };
 
   return (
@@ -409,7 +417,14 @@ const TrackViewScreen = () => {
             }}
           />
         ) : (
-          <Text style={{ fontSize: 21, fontWeight: 600, color: "#fff" }}>
+          <Text
+            style={{
+              fontSize: 21,
+              fontWeight: 600,
+              color: "#fff",
+              textAlign: "center",
+            }}
+          >
             No lyrics available for this song.
           </Text>
         )}
