@@ -124,7 +124,7 @@ const genres = [
     id: "3",
     name: "#Hip-Hop",
     video:
-      "https://video-previews.elements.envatousercontent.com/h264-video-previews/f09f4f6e-f443-41a0-baf9-925dbe75813c/21965034.mp4",
+    "https://video-previews.elements.envatousercontent.com/a5ce19e2-1512-4a74-94fb-7df9acb1d5b7/watermarked_preview/watermarked_preview.mp4",
     poster:
       "https://photo-resize-zmp3.zmdcdn.me/w600_r300x169_jpeg/thumb_video/8/0/1/c/801c0a9f296fd140a40f94ba3eae5e35.jpg",
   },
