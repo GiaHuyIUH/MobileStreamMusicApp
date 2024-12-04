@@ -15,6 +15,7 @@ export default function ChangeDisplayName() {
   const { userInfo, setUserInfo } = useAuth();
   console.log("ChangeDisplayName ~ userInfo:", userInfo);
   const [displayName, setDisplayName] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
 
   // Get the current logged-in user
   const auth = getAuth();
@@ -43,10 +44,30 @@ export default function ChangeDisplayName() {
   };
 
   const handleChangeDisplayName = async () => {
-    if (displayName.trim().length === 0) {
-      Alert.alert("Error", "Display name cannot be empty");
+    // Regex to allow only alphabetic characters and spaces (no numbers or special characters)
+    const regex = /^[a-zA-Z ]*$/;
+
+    // Check if the display name contains any special characters or numbers
+    if (!regex.test(displayName)) {
+      setErrorMessage("Display name cannot contain numbers or special characters.");
       return;
     }
+
+    // Check if the display name is empty
+    if (displayName.trim().length === 0) {
+      setErrorMessage("Display name cannot be empty.");
+      return;
+    }
+
+    // Check if the display name exceeds 20 characters
+    if (displayName.trim().length > 20) {
+      setErrorMessage("Display name cannot exceed 20 characters.");
+      return;
+    }
+
+    // Reset error message if everything is valid
+    setErrorMessage("");
+
     try {
       await updateUserName(displayName);
     } catch (error) {
@@ -63,6 +84,7 @@ export default function ChangeDisplayName() {
         placeholder="Enter a new display name"
         placeholderTextColor="#B3B3B3"
       />
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <Pressable onPress={handleChangeDisplayName} style={styles.button}>
         <Text style={styles.buttonText}>Save</Text>
       </Pressable>
@@ -78,12 +100,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 20,
   },
-  title: {
-    fontSize: 24,
-    color: "#1DB954", // Spotify green
-    fontWeight: "bold",
-    marginBottom: 20,
-  },
   input: {
     width: "100%",
     padding: 15,
@@ -91,7 +107,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     fontSize: 16,
     color: "#FFFFFF", // White text
-    marginBottom: 20,
+    marginBottom: 10,
   },
   button: {
     backgroundColor: "#1DB954", // Spotify green
@@ -107,5 +123,10 @@ const styles = StyleSheet.create({
     color: "#FFFFFF", // White text
     fontSize: 16,
     fontWeight: "600",
+  },
+  errorText: {
+    color: "#FF0000", // Red color for error message
+    fontSize: 14,
+    marginBottom: 10,
   },
 });
