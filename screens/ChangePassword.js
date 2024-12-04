@@ -16,6 +16,7 @@ const ChangePasswordScreen = () => {
   const [email, setEmail] = useState(userInfo?.email || "");
   const [oldPassword, setOldPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
+  const [errorMessage, setErrorMessage] = useState(""); // To display error messages
   const [oldPasswordVisible, setOldPasswordVisible] = useState(false); // Manage visibility for old password
   const [newPasswordVisible, setNewPasswordVisible] = useState(false); // Manage visibility for new password
   const navigation = useNavigation();
@@ -31,6 +32,10 @@ const ChangePasswordScreen = () => {
   };
 
   const handleChangePassword = async () => {
+    if (!validatePassword(newPassword)) {
+      return; // Stop execution if password is invalid
+    }
+
     try {
       const auth = getAuth();
       const user = auth.currentUser;
@@ -50,6 +55,27 @@ const ChangePasswordScreen = () => {
     } catch (error) {
       Alert.alert("Error", error.message);
     }
+  };
+
+  const validatePassword = (password) => {
+    if (password.length > 12) {
+      setErrorMessage("Password must not exceed 12 characters.");
+      return false;
+    }
+    if (!/[A-Z]/.test(password)) {
+      setErrorMessage("Password must contain at least one uppercase letter.");
+      return false;
+    }
+    if (!/[0-9]/.test(password)) {
+      setErrorMessage("Password must contain at least one number.");
+      return false;
+    }
+    if (!/[!@#$%^&*(),.?":{}|<>]/.test(password)) {
+      setErrorMessage("Password must contain at least one special character.");
+      return false;
+    }
+    setErrorMessage(""); // Clear error if password is valid
+    return true;
   };
 
   const reauthenticateUser = async (user, email, oldPassword) => {
@@ -115,6 +141,7 @@ const ChangePasswordScreen = () => {
           />
         </TouchableOpacity>
       </View>
+      {errorMessage ? <Text style={styles.errorText}>{errorMessage}</Text> : null}
       <View style={styles.buttonContainer}>
         <Button
           title="Change Password"
@@ -156,6 +183,11 @@ const styles = StyleSheet.create({
     position: "absolute",
     right: 16,
     top: 12,
+  },
+  errorText: {
+    color: "#FF0000", // Red error message
+    fontSize: 14,
+    marginBottom: 10,
   },
 });
 
