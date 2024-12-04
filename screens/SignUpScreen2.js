@@ -22,6 +22,7 @@ const SignUpScreen2 = ({ route, navigation }) => {
   const [isCheckedNews, setIsCheckedNews] = useState(false);
   const [isCheckedMarketing, setIsCheckedMarketing] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [userNameError, setUserNameError] = useState(""); // Added state for userName error
 
   const handleRegister = async () => {
     try {
@@ -53,8 +54,25 @@ const SignUpScreen2 = ({ route, navigation }) => {
   };
 
   const handleClickCreateAccount = async () => {
-    if (handleRegister()) navigation.navigate("ChooseArtistScreen");
+    if (validateUserName() && handleRegister()) {
+      navigation.navigate("ChooseArtistScreen");
+    }
   };
+
+  // Regex for username validation
+  // Regex mới cho userName: không chứa số, không chứa ký tự đặc biệt và giới hạn 20 ký tự
+const validateUserName = () => {
+  const regexUserName = /^[A-Za-z]{1,20}$/; // Regex không chứa số, không chứa ký tự đặc biệt và tối đa 20 ký tự
+  if (!regexUserName.test(userName)) {
+    setUserNameError(
+      "Username must only contain letters and be no longer than 20 characters."
+    );
+    return false;
+  }
+  setUserNameError(""); // Clear error if validation is successful
+  return true;
+};
+
 
   return (
     <View style={styles.container}>
@@ -67,8 +85,11 @@ const SignUpScreen2 = ({ route, navigation }) => {
             value={userName}
             onChangeText={setUserName}
           />
-          <Text style={styles.label}>{errorMessage}</Text>
         </View>
+        {/* Display userNameError outside the input field */}
+        {userNameError ? (
+          <Text style={styles.errorText}>{userNameError}</Text>
+        ) : null}
 
         <Text style={styles.PrimaryLabel}>What's your gender?</Text>
         <View style={styles.inputContainer}>
@@ -91,7 +112,7 @@ const SignUpScreen2 = ({ route, navigation }) => {
         <View style={styles.containerTerm}>
           {/* Terms of Use Text */}
           <Text style={styles.termsText}>
-            By tapping on "Create account", you agree to the spotify Terms of
+            By tapping on "Create account", you agree to the Spotify Terms of
             Use.
           </Text>
 
@@ -134,7 +155,6 @@ const SignUpScreen2 = ({ route, navigation }) => {
           style={{ flex: 1, alignItems: "center", justifyContent: "flex-end" }}
         >
           <TouchableOpacity
-            // disabled={email.length || password.length < 8 ? true : false}
             style={{
               backgroundColor: "#ccc",
               borderRadius: 30,
@@ -244,6 +264,12 @@ const styles = StyleSheet.create({
     height: 1,
     backgroundColor: "#7777",
     marginVertical: 20,
+  },
+  errorText: {
+    color: "red",  // Red text for error messages
+    fontSize: 12,
+    marginTop: -10,  // Added space above the error message
+    textAlign: "center", // Optional: Align the text centrally
   },
 });
 
