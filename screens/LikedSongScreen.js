@@ -19,6 +19,9 @@ import {
   setAudioUrl,
   setRadioUrl,
   setShowPlayer,
+  setShowSubPlayer,
+  setPlaylist,
+  setDuration,
 } from "../store/playerSlice"; // Adjust path as needed
 import { useAuth } from "../context/auth-context";
 import axios from "axios";
@@ -44,11 +47,13 @@ export default function LikedSongScreen({ navigation }) {
         const res = await Promise.all(promises);
         const songData = res?.map((r) => r.data.data);
         setLikedSongs(songData);
+        setIsLoading(false);
+        dispatch(setPlaylist(songData));
+        dispatch(setCurrentProgress(0));
       }
-      setIsLoading(false);
     };
     fetchLikedSongs();
-  }, []);
+  }, [userInfo?.Songs]);
 
   console.log("LikedSongScreen ~ likedSongs:", likedSongs);
 
@@ -114,7 +119,8 @@ export default function LikedSongScreen({ navigation }) {
         dispatch(setAudioUrl(""));
         dispatch(setRadioUrl(""));
         dispatch(setShowPlayer(true));
-        dispatch(setIsPlaying(true));
+        dispatch(setShowSubPlayer(false));
+        dispatch(setDuration(item.duration));
       }}
       key={index}
       style={{
