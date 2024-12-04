@@ -144,11 +144,11 @@ const HomeScreen = ({ navigation }) => {
   const BannerItem = ({ item }) => (
     <TouchableOpacity
       style={styles.bannerContainer}
-      onPress={() => {
-        navigation.navigate("PlayList", {
-          id: item.encodeId,
-        });
-      }}
+      // onPress={() => {
+      //   navigation.navigate("PlayList", {
+      //     id: item.encodeId,
+      //   });
+      // }}
     >
       <Image source={{ uri: item.banner }} style={styles.bannerImage} />
     </TouchableOpacity>
