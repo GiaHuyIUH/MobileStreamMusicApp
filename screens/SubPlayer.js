@@ -41,6 +41,7 @@ export default function SubPlayer({ data }) {
   const playlist = useSelector((state) => state.player.playlist);
   const isRepeat = useSelector((state) => state.player.isRepeat);
   const isRandom = useSelector((state) => state.player.isRandom);
+
   useEffect(() => {
     if (userInfo?.Songs?.some((song) => song.songId === singleSong.encodeId)) {
       dispatch(setIsLove(true));
@@ -211,10 +212,13 @@ export default function SubPlayer({ data }) {
           </TouchableOpacity>
         </View>
       </TouchableOpacity>
-      <View style={styles.progressBarBackground}>
-        <View
-          style={[styles.progressBar, { width: `${currentProgress * 100}%` }]}
-        />
+      {/* Thanh tiến trình */}
+      <View style={styles.progressBarContainer}>
+        <View style={styles.progressBarBackground}>
+          <View
+            style={[styles.progressBar, { width: `${currentProgress * 100}%` }]}
+          />
+        </View>
       </View>
     </View>
   );
@@ -223,21 +227,24 @@ export default function SubPlayer({ data }) {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: "#1c1c1e",
-    height: 64,
+    height: 70, // Tăng chiều cao của container để bao gồm cả thanh tiến trình
     width: "98%",
     borderRadius: 15,
     borderTopWidth: 1,
     borderTopColor: "#282828",
     alignSelf: "center",
+    justifyContent: "flex-start", // Để phần điều khiển và thanh tiến trình có đủ không gian
+    paddingBottom: 8, // Đảm bảo thanh tiến trình không bị cắt
   },
   subPlayer: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    height: 54,
-    paddingHorizontal: 12,
+    height: 30, // Giảm chiều cao của subPlayer
+    paddingHorizontal: 8, // Giảm khoảng cách ngang
     flex: 1,
   },
+  
   infoContainer: {
     flex: 4,
     flexDirection: "row",
@@ -269,19 +276,22 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "flex-end",
-    gap: 20,
   },
   iconButton: {
-    alignItems: "center",
-    justifyContent: "center",
+    marginHorizontal: 10,
+  },
+  progressBarContainer: {
+    height: 4,
+    marginHorizontal: 12,
+    //marginBottom: 8, // Add space between the progress bar and other elements
   },
   progressBarBackground: {
-    height: 4,
+    height: "100%",
     borderRadius: 9999,
     backgroundColor: "#404040",
   },
   progressBar: {
-    height: 4,
+    height: "100%",
     borderRadius: 9999,
     backgroundColor: "#1DB954",
   },
